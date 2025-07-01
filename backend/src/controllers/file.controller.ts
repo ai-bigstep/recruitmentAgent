@@ -7,6 +7,18 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import s3 from '../utils/s3';
 import File from '../models/file.model';
 import { AuthRequest } from '../middleware/auth.middleware';
+import Application from '../models/application.model';
+
+
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import { sign } from 'crypto';
+
+const sqs = new SQSClient({ region: process.env.AWS_REGION || 'ap-south-1' });
+const QUEUE_URL = 'https://sqs.ap-south-1.amazonaws.com/474560118046/resumequeue';
+
+
+
+
 
 export const uploadResume = async (req: AuthRequest, res: Response) => {
   const { job_id } = req.params;
@@ -63,6 +75,39 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
       // Step 4: Update file record with final S3 path
       await createdFile.update({ path: s3Key });
 
+
+      const application = await Application.create({
+        job_id,
+        name: '',
+        phone: '',
+        email: '',
+        ats_score: 0,
+        resume_url: s3Key,
+        status: 'pending', // optional, will default anyway
+      });
+
+      // Step 5: Send message to SQS queue
+      const messageCommand = new SendMessageCommand({
+        QueueUrl: QUEUE_URL,
+        MessageBody: 'ResumeToProcess',
+        MessageAttributes: {
+          ApplicationID: {
+            DataType: 'String',
+            StringValue: application.id.toString(), 
+          },
+          FileID: {
+            DataType: 'String',
+            StringValue: fileId.toString(), // Use the signed URL for processing
+          },
+        },
+      });
+      
+      try {
+        await sqs.send(messageCommand);
+        console.log(`Enqueued resume for applicant ID ${application.id} and resume id ${fileId} to SQS`);
+      } catch (err) {
+        console.error('Error sending SQS message:', err);
+      }
     }
 
     // Cleanup ZIP file

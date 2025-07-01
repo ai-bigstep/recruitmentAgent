@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <title>AI Playground</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/app.js" type="module" ></script>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>AI Playground</h1>
+      <p>Experiment and interact with AI in real-time</p>
+    </div>
+
+    <div class="playground-container">
+      <div class="controls">
+        <button type="button" id="clearButton" class="control-button">Clear Chat</button>
+        <button type="button" id="startAudioButton" class="control-button">Start Voice</button>
+        <button type="button" id="stopAudioButton" class="control-button" disabled>Stop Voice</button>
+      </div>
+
+      <div class="chat-window">
+        <div id="messages" class="messages-container"></div>
+
+        <form id="messageForm" class="input-form">
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              id="message" 
+              name="message" 
+              placeholder="Type your message here..."
+              autocomplete="off"
+            />
+            <button type="submit" id="sendButton" disabled>Send</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

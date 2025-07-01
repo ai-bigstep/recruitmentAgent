@@ -1,0 +1,1 @@
+prompt_resume_extractor = """Hello"""

@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.840.0",
+    "@aws-sdk/client-sqs": "^3.840.0",
     "@aws-sdk/s3-request-presigner": "^3.840.0",
     "adm-zip": "^0.5.16",
     "aws-sdk": "^2.1692.0",
