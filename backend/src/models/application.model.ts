@@ -3,7 +3,7 @@
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
-import s3 from '../utils/s3'; // your initialized s3 client
+import s3 from '../config/s3'; // your initialized s3 client
 
 
 import { DataTypes, Model, Optional } from 'sequelize';

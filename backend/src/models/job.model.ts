@@ -12,7 +12,7 @@ interface JobAttributes {
   location: string;
   is_active: string;
   is_published: boolean;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'queued' | 'completed' | 'failed';
   user_id: string;
 }
 
@@ -29,7 +29,7 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
   public is_active!: string;
   public is_published!: boolean;
   public user_id!: string;
-  public status!: 'pending' | 'processing' | 'completed' | 'failed';
+  public status!: 'pending' | 'queued' | 'completed' | 'failed';
 
 
   public readonly createdAt!: Date;
@@ -78,7 +78,7 @@ Job.init(
       defaultValue: true,
     },
     status: {
-      type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed'),
+      type: DataTypes.ENUM('pending', 'queued', 'completed', 'failed'),
       allowNull: true,
       defaultValue: 'pending',
     },
