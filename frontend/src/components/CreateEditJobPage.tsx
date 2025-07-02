@@ -22,7 +22,7 @@ const CreateEditJobPage: React.FC = () => {
         {
           title: jobTitle,
           description: jobDescription,
-          screening_questions_prompt,
+          screening_questions_prompt: screeningPrompt,
           ats_calculation_prompt: atsPrompt,
         },
         {

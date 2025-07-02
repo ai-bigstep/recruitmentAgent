@@ -59,7 +59,7 @@ async def get_tools_async():
     logger.info("MCP Toolset created successfully.")
     return tools, None  # No exit stack needed
 
-async def get_agent_async(purpose: str = "resume_extractor"):
+async def get_agent_async(purpose: str = "resume_extractor", extras: dict = {}):
     """Creates an ADK Agent equipped with tools from the MCP Server."""
     # logger.info("Creating agent with tools...")
     # tools, exit_stack = await get_tools_async()
@@ -68,7 +68,12 @@ async def get_agent_async(purpose: str = "resume_extractor"):
 
     # Add logging for memory tool
     logger.info("Adding load_memory tool to agent")
-    instruction = prompt_resume_extractor
+    if purpose == "resume_extractor":
+        instruction = prompt_resume_extractor.replace(
+            "{{ats_calculation_prompt}}", extras.get("ats_calculation_prompt", "")
+        ).replace(
+            "{{job_description}}", extras.get("job_description", "")
+        )
     # guardrail = godrej_guardrail if company == "godrej" else tata_guardrail
     root_agent = LlmAgent(
         model="gemini-2.0-flash-exp",
@@ -83,7 +88,7 @@ async def get_agent_async(purpose: str = "resume_extractor"):
 # root_agent,exit_stack= get_agent_async()
 async  def start_agent_session(session_id, is_audio=False):
     """Starts an agent session"""
-    root_agent,exit_stack= await get_agent_async()
+    root_agent = await get_agent_async()
     # Create a Session
     session =  await session_service.create_session(
         app_name=APP_NAME,
