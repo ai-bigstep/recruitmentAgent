@@ -1,6 +1,6 @@
 import os
 import time
-import boto3 # type:ignore
+import boto3
 import requests
 from dotenv import load_dotenv
 

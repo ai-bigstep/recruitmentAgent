@@ -11,4 +11,9 @@ backend/.env
 
 *.venv
 
-adk-agent/main2.py
+# Python cache files
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd

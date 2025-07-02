@@ -13,7 +13,13 @@ def get_job_data(job_id):
 def update_application(application_id, data):
     stmt = update(applications).where(applications.c.id == application_id).values(
         name=data.get("name"), email=data.get("email"),
-        phone=data.get("phone"), ats_score=data.get("ats_score")
+        phone=data.get("phone"), ats_score=data.get("ats_score"),
     )
+    session.execute(stmt)
+    session.commit()
+    
+    
+def update_application_status(application_id, status):
+    stmt = update(applications).where(applications.c.id == application_id).values(status=status)
     session.execute(stmt)
     session.commit()

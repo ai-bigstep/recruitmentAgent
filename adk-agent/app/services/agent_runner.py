@@ -5,7 +5,6 @@ from google.adk.runners import Runner
 from google.genai import types
 import json
 USER_ID = "new"
-
    
 async def run_agent_resume_extract(application_id: str, resume_raw_text: str, ats_calculation_prompt: str, job_description: str):
     session_id = application_id  # Use application_id as session_id
