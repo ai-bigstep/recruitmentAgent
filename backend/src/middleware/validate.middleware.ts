@@ -12,7 +12,7 @@ const validate = (schema: ObjectSchema) => {
     
 
     if (error) {
-      console.log('Validation error:', error);
+      console.error('Validation error:', error.details[0].message);
       return res.status(400).json({ message: error.details[0].message });
     }
 

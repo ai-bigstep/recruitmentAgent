@@ -12,7 +12,7 @@ import { authenticateToken } from '../middleware/auth.middleware';
 
 import { jobSchema } from '../validators/jobValidator';
 import validate from '../middleware/validate.middleware';
-import { fileSchema } from '../validators/fileValidator';
+
 
 
 import multer from 'multer';

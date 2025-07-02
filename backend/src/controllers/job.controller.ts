@@ -18,7 +18,6 @@ export const createJob = async (req: AuthRequest, res: Response) => {
     location,
     user_id,
   });
-  console.log('Job created:', job);
 
   res.status(201).json(job);
 };

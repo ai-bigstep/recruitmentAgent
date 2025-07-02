@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import Application from '../models/application.model';
-import Job from '../models/job.model';
 
 export const getCandidatesByJob = async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -8,13 +7,6 @@ export const getCandidatesByJob = async (req: Request, res: Response) => {
   try {
     const candidates = await Application.findAll({
       where: { job_id: jobId },
-      include: [
-        {
-          model: Job,
-          as: 'job',
-          attributes: ['id', 'title', 'description'],
-        },
-      ],
       order: [['createdAt', 'DESC']],
     });
 
@@ -24,3 +16,4 @@ export const getCandidatesByJob = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Failed to retrieve candidates for the job' });
   }
 };
+
