@@ -1,4 +1,4 @@
-import base64, boto3, os # type:ignore
+import base64, boto3, os
 
 
 
