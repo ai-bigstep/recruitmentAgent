@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const CreateEditJobPage: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
-  const [screeningPrompt, setScreeningPrompt] = useState('');
+  const [screening_questions_prompt, setScreeningPrompt] = useState('');
   const [atsPrompt, setATSPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -118,7 +118,7 @@ const CreateEditJobPage: React.FC = () => {
               Screening Questions Prompt
             </label>
             <textarea
-              value={screeningPrompt}
+              value={screening_questions_prompt}
               onChange={(e) => setScreeningPrompt(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
               placeholder="Enter screening questions prompt"

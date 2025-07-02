@@ -9,7 +9,6 @@ import CreateEditJobPage from './components/CreateEditJobPage'; // update path i
 
 import JobDisplay from './components/JobDisplay';
 import PrivateRoute from './components/PrivateRoute';
-import Upload from './components/Upload'; // Assuming you have an Upload component
 const App: React.FC = () => {
   return (
     <AuthProvider>

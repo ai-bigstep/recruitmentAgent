@@ -4,7 +4,7 @@ import AdmZip from 'adm-zip';
 import mime from 'mime-types';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 
-import s3 from '../utils/s3';
+import s3 from '../config/s3';
 import File from '../models/file.model';
 import { AuthRequest } from '../middleware/auth.middleware';
 import Application from '../models/application.model';
@@ -24,7 +24,7 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
   const { job_id } = req.params;
   const file = req.file;
   const user_id = req.user?.id;
-
+  
   if (!user_id) {
     return res.status(401).json({ message: 'Unauthorized: Missing user ID' });
   }
@@ -32,6 +32,7 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
   if (!file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
+  
 
   try {
     const zip = new AdmZip(file.path);
