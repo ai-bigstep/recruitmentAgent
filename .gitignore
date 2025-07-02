@@ -10,3 +10,5 @@ backend/.env
 *.env
 
 *.venv
+
+adk-agent/main2.py
