@@ -22,7 +22,7 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ where: { email } });
-
+  
   if (!user || !(await user.validPassword(password))) {
     throw new AppError('Invalid credentials', 401);
   }
@@ -30,9 +30,9 @@ export const login = async (req: Request, res: Response) => {
   const token = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET as string,
-    { expiresIn: '1h' }
+    { expiresIn: '1d' }
   );
-
+ 
   res.status(200).json({
     status: 'success',
     token,

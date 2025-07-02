@@ -57,18 +57,19 @@ const JobDisplay = () => {
   };
 
   const handleFileUpload = async () => {
+    console.log('Uploading file for job', selectedJobId);
     if (!selectedFile || !selectedJobId) return;
 
     const formData = new FormData();
     formData.append('resume', selectedFile);
-    
+    const job_id = selectedJobId;
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:5000/api/jobs/upload/${selectedJobId}`, formData, {
+      await axios.post(`http://localhost:5000/api/jobs/upload/${job_id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+          
         },
       });
       alert('Resume uploaded successfully!');

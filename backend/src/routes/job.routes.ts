@@ -6,7 +6,14 @@ import {
   updateJob,
   deleteJob,
 } from '../controllers/job.controller';
+
 import { authenticateToken } from '../middleware/auth.middleware';
+
+
+import { jobSchema } from '../validators/jobValidator';
+import validate from '../middleware/validate.middleware';
+import { fileSchema } from '../validators/fileValidator';
+
 
 import multer from 'multer';
 import { uploadResume } from '../controllers/file.controller';
@@ -16,10 +23,10 @@ const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
 // Job routes
-router.post('/', authenticateToken, catchAsync(createJob));
+router.post('/', authenticateToken,validate(jobSchema), catchAsync(createJob));
 router.get('/', authenticateToken, catchAsync(getJobsByRecruiter));
 router.get('/:id', authenticateToken, catchAsync(getJobById));
-router.put('/:id', authenticateToken, catchAsync(updateJob));
+router.put('/:id', authenticateToken,validate(jobSchema), catchAsync(updateJob));
 router.delete('/:id', authenticateToken, catchAsync(deleteJob));
 
 // File upload route
