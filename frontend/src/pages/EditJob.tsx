@@ -6,11 +6,12 @@ import {
   Typography,
   Container,
   CircularProgress,
-  Alert,
   Stack,
   MenuItem,
   IconButton,
   InputAdornment,
+  Snackbar,
+  Slide,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
@@ -83,7 +84,11 @@ const EditJob: React.FC = () => {
       );
 
       setMessage({ type: 'success', text: 'Job updated successfully!' });
-      navigate('/alljobs');
+
+      // Delay navigation to allow toast to be visible
+      setTimeout(() => {
+        navigate('/alljobs');
+      }, 1000);
     } catch (error: any) {
       const errMsg = error.response?.data?.message || error.message || 'Failed to update job';
       setMessage({ type: 'error', text: errMsg });
@@ -101,9 +106,7 @@ const EditJob: React.FC = () => {
 
     setIsGenerating(true);
     try {
-      // Simulate an AI API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
       const aiGenerated = `AI-generated description for prompt: "${aiPrompt}"`;
       setJobDescription(aiGenerated);
     } catch (err) {
@@ -133,10 +136,17 @@ const EditJob: React.FC = () => {
         Bigstep HR Assistant - Edit Job
       </Typography>
 
+      <Snackbar
+        open={!!message}
+        onClose={() => setMessage(null)}
+        autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        TransitionComponent={(props) => <Slide {...props} direction="down" />}
+        message={message?.text}
+      />
+
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
-          {message && <Alert severity={message.type}>{message.text}</Alert>}
-
           <TextField
             label="Job Title"
             value={jobTitle}

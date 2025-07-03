@@ -6,19 +6,20 @@ import React, {
   ReactNode,
 } from 'react';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
-// Define types for user and context value
+import { jwtDecode } from 'jwt-decode';
+
+// Define types
 interface User {
   id: string;
   email: string;
   role: string;
 }
-// JWT payload interface must match what you encode in backend
+
 interface JwtPayload {
   id: string;
   email: string;
   role: string;
-  exp?: number; // optional expiration
+  exp?: number;
 }
 
 interface AuthContextType {
@@ -26,12 +27,11 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: Record<string, any>) => Promise<boolean>;
-  logout: () => void;
+  logout: (redirect?: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hook to consume auth context
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -40,32 +40,54 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-// Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const logout = (redirect = true) => {
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    setUser(null);
+    if (redirect) {
+      window.location.href = '/login'; // Use hard redirect here
+    }
+  };
+
   useEffect(() => {
-    
     const token = localStorage.getItem('token');
     if (token) {
-      
       try {
         const decoded = jwtDecode<JwtPayload>(token);
-        console.log('Decoded token:', decoded);
-        setUser({
-          id: decoded.id,
-          email: decoded.email,
-          role: decoded.role,
-        });
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+          console.warn('Token expired');
+          logout(false);
+        } else {
+          setUser({
+            id: decoded.id,
+            email: decoded.email,
+            role: decoded.role,
+          });
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
       } catch (err) {
-        console.error('Invalid token');
-        console.error('Token decoding failed:', err);
-        localStorage.removeItem('token');
+        console.error('Token decode failed:', err);
+        logout(false);
       }
     }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (res) => res,
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -80,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -97,15 +119,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
   };
 
   const value: AuthContextType = {
