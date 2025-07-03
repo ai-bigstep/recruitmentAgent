@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 
 class User extends Model {
   public id!: string;
@@ -9,17 +8,12 @@ class User extends Model {
   public email!: string;
   public password!: string;
   public role!: 'recruiter' | 'superadmin';
+  public passwordResetToken!: string | null;
+  public passwordResetExpires!: Date | null;
 
   public validPassword(password: string): boolean {
     return bcrypt.compareSync(password, this.password);
   }
-}
-
-// Utility to generate a random 10-character alphanumeric string
-function generateRandomId(length = 10): string {
-  return crypto.randomBytes(Math.ceil(length / 2))
-               .toString('hex')
-               .slice(0, length);
 }
 
 User.init(
@@ -47,16 +41,20 @@ User.init(
       allowNull: false,
       defaultValue: 'recruiter',
     },
+    passwordResetToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    passwordResetExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: 'users',
     sequelize,
     hooks: {
       beforeCreate: async (user: User) => {
-        // Generate unique random ID
-        
-
-        // Hash password
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
       },

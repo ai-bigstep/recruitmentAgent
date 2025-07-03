@@ -7,8 +7,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import CreateJob from './pages/CreateJob';
- import AllJobs from './pages/AllJobs';
-
+import AllJobs from './pages/AllJobs';
+import ForgotPassword from './pages/ForgotPassword';
  
 
 import PrivateRoute from './components/PrivateRoute';
@@ -17,6 +17,7 @@ import UploadResumeModalWrapper from './pages/UploadResumeModalWrapper';
 import ApplicationDetail from './components/ApplicationDetail';
 import EditJob from './pages/EditJob';
 import JobDetails from './pages/JobDetails';
+import ResetPassword from './pages/ResetPassword';
 
 
 const App: React.FC = () => {
@@ -49,6 +50,8 @@ const App: React.FC = () => {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Fallback */}
           <Route

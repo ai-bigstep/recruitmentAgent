@@ -2,6 +2,12 @@ import { Request, Response } from 'express';
 import User from '../models/user.model';
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError'; // Custom error class
+import { sendEmail } from '../config/sendEmail'; 
+import bcrypt from 'bcrypt';
+import { Op } from 'sequelize';
+
+import crypto from 'crypto';
+
 
 export const register = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -43,4 +49,54 @@ export const login = async (req: Request, res: Response) => {
       role: user.role,
     },
   });
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const user = await User.findOne({ where: { email } });
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  // Generate a secure random token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  user.passwordResetToken = resetToken;
+  user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+  await user.save();
+
+  const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Password Reset',
+    html: `
+      <p>Hello ${user.name},</p>
+      <p>Click below to reset your password:</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>This link will expire in 15 minutes.</p>
+    `,
+  });
+
+  res.status(200).json({ message: 'Reset link sent to email' });
+};
+
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+
+  const user = await User.findOne({
+    where: {
+      passwordResetToken: token,
+      passwordResetExpires: { [Op.gt]: new Date() }, // Not expired
+    },
+  });
+
+  if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+
+  const hashed = await bcrypt.hash(password, 10);
+  user.password = hashed;
+  user.passwordResetToken = null;
+  user.passwordResetExpires = null;
+  await user.save();
+
+  res.status(200).json({ message: 'Password successfully reset' });
 };
