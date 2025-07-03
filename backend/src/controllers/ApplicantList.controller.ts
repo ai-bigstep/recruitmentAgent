@@ -6,7 +6,7 @@ export const getApplicantsByJob = async (req: Request, res: Response) => {
 
   try {
     const candidates = await Application.findAll({
-      where: { job_id: jobId },
+      where: { job_id: jobId, is_deleted: false },
       order: [['createdAt', 'DESC']],
     });
 
@@ -14,6 +14,23 @@ export const getApplicantsByJob = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching candidates for job:', error);
     return res.status(500).json({ message: 'Failed to retrieve candidates for the job' });
+  }
+};
+
+export const softDeleteApplicant = async (req: Request, res: Response) => {
+  const { applicantId } = req.params;
+  try {
+    const [affectedRows] = await Application.update(
+      { is_deleted: true },
+      { where: { id: applicantId } }
+    );
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: 'Applicant not found' });
+    }
+    return res.status(200).json({ message: 'Applicant soft deleted successfully' });
+  } catch (error) {
+    console.error('Error soft deleting applicant:', error);
+    return res.status(500).json({ message: 'Failed to soft delete applicant' });
   }
 };
 

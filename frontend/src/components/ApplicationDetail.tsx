@@ -33,53 +33,11 @@ interface Candidate {
   call_status?: string;
   call_analysis?: string;
   is_accepted?: boolean;
+  status?: string;
 }
 
-const initialRows: Candidate[] = [
-  {
-    id: '1',
-    name: 'Jon Snow',
-    phone: '1234567890',
-    email: 'jon.snow@example.com',
-    ats_score: 85,
-    resume_url: 'https://example.com/resumes/jon.pdf',
-    call_status: 'Scheduled',
-    call_analysis: 'Good communication skills',
-  },
-  {
-    id: '2',
-    name: 'Cersei Lannister',
-    phone: '9876543210',
-    email: 'cersei.lannister@example.com',
-    ats_score: 78,
-    resume_url: 'https://example.com/resumes/cersei.pdf',
-    call_status: 'Completed',
-    call_analysis: 'Very confident',
-  },
-  {
-    id: '3',
-    name: 'Jaime Lannister',
-    phone: '9998887777',
-    email: 'jaime.lannister@example.com',
-    ats_score: 82,
-    resume_url: 'https://example.com/resumes/jaime.pdf',
-    call_status: 'Pending',
-    call_analysis: '',
-  },
-  {
-    id: '4',
-    name: 'Arya Stark',
-    phone: '1112223333',
-    email: 'arya.stark@example.com',
-    ats_score: 92,
-    resume_url: 'https://example.com/resumes/arya.pdf',
-    call_status: 'Scheduled',
-    call_analysis: 'Highly skilled',
-  },
-];
-
 const ApplicationDetail: React.FC = () => {
-  const [rows, setRows] = React.useState<Candidate[]>(initialRows);
+  const [rows, setRows] = React.useState<Candidate[]>([]);
   const [ratedCandidates, setRatedCandidates] = React.useState<Set<string>>(new Set());
   const [shortlistDisabled, setShortlistDisabled] = React.useState<Set<string>>(new Set());
   const [disabledCalls, setDisabledCalls] = React.useState<Set<string>>(new Set());
@@ -89,7 +47,17 @@ const ApplicationDetail: React.FC = () => {
   React.useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
 
   const { jobId } = useParams();
-  console.log(`Job ID: ${jobId}`);
+  const job_id = jobId;
+  React.useEffect(() => {
+    if (!jobId) return;
+    fetch(`http://localhost:5000/api/applicant/job/${job_id}`)
+      .then(res => res.json())
+      .then(data => setRows(data))
+      .catch(err => {
+        console.error('Failed to fetch applicants:', err);
+        setRows([]);
+      });
+  }, [jobId]);
 
   const handleCallClick = (id: string) => {
     setDisabledCalls((prev) => new Set(prev).add(id));
@@ -121,9 +89,26 @@ const ApplicationDetail: React.FC = () => {
     rowSelectionModel && 'ids' in rowSelectionModel ? rowSelectionModel.ids : []
   );
 
-  const handleDeleteSelected = () => {
-    setRows((prev) => prev.filter((row) => !selectedIdArray.includes(row.id)));
-    setRowSelectionModel({ type: 'include', ids: new Set() });
+  const handleDeleteSelected = async () => {
+    // Soft delete each selected applicant via backend
+    try {
+      await Promise.all(selectedIdArray.map(async (id) => {
+        const res = await fetch(`http://localhost:5000/api/applicant/delete/${id}`, {
+          method: 'DELETE',
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to delete applicant with id ${id}`);
+        }
+        if (res.ok) {
+          console.log(`Applicant with id ${id} deleted successfully`);
+        }
+      }));
+      setRows((prev) => prev.filter((row) => !selectedIdArray.includes(row.id)));
+      setRowSelectionModel({ type: 'include', ids: new Set() });
+    } catch (err) {
+      alert('Failed to delete one or more applicants.');
+      console.error(err);
+    }
   };
 
   const filteredRows = React.useMemo(() => {
@@ -150,6 +135,16 @@ const ApplicationDetail: React.FC = () => {
       ),
     },
     { field: 'ats_score', headerName: 'ATS Score', width: 100 },
+    {
+      field: 'status',
+      headerName: 'AI Status',
+      width: 120,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          {params.row.status}
+        </Typography>
+      ),
+    },
     {
       field: 'rating',
       headerName: 'HR Rating',
