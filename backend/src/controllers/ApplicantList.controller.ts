@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Application from '../models/application.model';
 
-export const getCandidatesByJob = async (req: Request, res: Response) => {
+export const getApplicantsByJob = async (req: Request, res: Response) => {
   const { jobId } = req.params;
 
   try {

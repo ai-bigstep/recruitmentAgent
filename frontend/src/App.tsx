@@ -1,3 +1,4 @@
+// App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -5,45 +6,49 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
-import CreateEditJobPage from './components/CreateEditJobPage'; // update path if needed
+import CreateJob from './pages/CreateJob';
+ import AllJobs from './pages/AllJobs';
 
-import JobDisplay from './components/JobDisplay';
+ 
+
 import PrivateRoute from './components/PrivateRoute';
+import Dashboard from './components/Dashboard';
+import UploadResumeModalWrapper from './pages/UploadResumeModalWrapper';
+import ApplicationDetail from './components/ApplicationDetail';
+import EditJob from './pages/EditJob';
+
+
 const App: React.FC = () => {
+
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-
-          {/* Home with Job Display - Protected */}
+          {/* Private Routes under Dashboard */}
           <Route
             path="/"
             element={
               <PrivateRoute>
-                <>
-                  <Home />
-                  
-                  <JobDisplay />
-                </>
+                <Dashboard />
               </PrivateRoute>
             }
-          />
+          >
+            <Route index element={<Home />} />
+            <Route path="alljobs" element={<AllJobs />} />
+            <Route path="createjob" element={<CreateJob />} />
+            <Route path="job/upload/:jobId" element={<UploadResumeModalWrapper />} />
+            <Route path="job/applicant/:jobId" element={<ApplicationDetail />} />
+            <Route path="/editjob/:id" element={<EditJob />} />
+          </Route>
 
-          {/* Create/Edit Job Page - Protected */}
-          <Route
-            path="/create-job"
-            element={
-              <PrivateRoute>
-                <CreateEditJobPage />
-              </PrivateRoute>
-            }
-          />
+          
+
 
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Fallback Route */}
+          {/* Fallback */}
           <Route
             path="*"
             element={

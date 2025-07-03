@@ -3,12 +3,9 @@ import { ObjectSchema } from 'joi';
 
 const validate = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const data = {
-      ...req.body,
-      ...req.params,
-    };
-    const { error } = schema.validate(data);
-
+    
+    const { error } = schema.validate(req.body);
+    const id = req.params.id || req.params.jobId;
     
 
     if (error) {

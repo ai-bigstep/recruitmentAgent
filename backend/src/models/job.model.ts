@@ -8,7 +8,7 @@ interface JobAttributes {
   description: string;
   screening_questions_prompt?: string;
   ats_calculation_prompt?: string;
-  type: 'full_time' | 'freelance';
+  type: 'Full Time' | 'Freelance';
   location: string;
   is_active: string;
   is_published: boolean;
@@ -16,7 +16,7 @@ interface JobAttributes {
   user_id: string;
 }
 
-type JobCreationAttributes = Optional<JobAttributes, 'id' | 'screening_questions_prompt' | 'ats_calculation_prompt' | 'is_active' | 'is_published' | 'type' | 'location' | 'user_id' | 'status'>;
+type JobCreationAttributes = Optional<JobAttributes, 'id' | 'is_active' | 'is_published' |  'user_id' | 'status'>;
 
 class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttributes {
   public id!: string;
@@ -24,7 +24,7 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
   public description!: string;
   public screening_questions_prompt?: string;
   public ats_calculation_prompt?: string;
-  public type!: 'full_time' | 'freelance';
+  public type!: 'Full Time' | 'Freelance';
   public location!: string;
   public is_active!: string;
   public is_published!: boolean;
@@ -53,19 +53,19 @@ Job.init(
     },
     screening_questions_prompt: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
     ats_calculation_prompt: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM('full_time', 'freelance'),
-      allowNull: true,
+      type: DataTypes.ENUM('Full Time', 'Freelance'),
+      allowNull: false,
     },
     location: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     is_active: {
       type: DataTypes.BOOLEAN,
