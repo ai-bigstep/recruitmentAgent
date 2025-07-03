@@ -2,7 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Grid, Box, CircularProgress, Typography } from '@mui/material';
+import {
+  Grid,
+  Box,
+  CircularProgress,
+  Typography,
+  Snackbar,
+  Slide,
+} from '@mui/material';
 import JobCard from '../components/JobCard';
 
 interface Job {
@@ -15,7 +22,8 @@ interface Job {
 
 const AllJobs: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true); // ✅ loading state
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -32,6 +40,7 @@ const AllJobs: React.FC = () => {
         setJobs(response.data);
       } catch (error) {
         console.error('Failed to fetch jobs:', error);
+        setMessage({ type: 'error', text: 'Failed to load jobs' });
       } finally {
         setLoading(false);
       }
@@ -40,7 +49,7 @@ const AllJobs: React.FC = () => {
     if (user) {
       fetchJobs();
     } else {
-      setLoading(false); // stop loading if no user
+      setLoading(false);
     }
   }, [user]);
 
@@ -53,8 +62,10 @@ const AllJobs: React.FC = () => {
         },
       });
       setJobs(prev => prev.filter(job => job.id !== id));
+      setMessage({ type: 'success', text: 'Job deleted successfully!' });
     } catch (error) {
       console.error('Error deleting job:', error);
+      setMessage({ type: 'error', text: 'Failed to delete job' });
     }
   };
 
@@ -71,6 +82,15 @@ const AllJobs: React.FC = () => {
       <Typography variant="h4" align="center" color="primary" gutterBottom>
         All Jobs
       </Typography>
+
+      <Snackbar
+        open={!!message}
+        onClose={() => setMessage(null)}
+        autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        TransitionComponent={(props) => <Slide {...props} direction="down" />}
+        message={message?.text}
+      />
 
       {jobs.length === 0 ? (
         <Typography variant="body1" align="center" color="textSecondary">

@@ -16,6 +16,7 @@ import Dashboard from './components/Dashboard';
 import UploadResumeModalWrapper from './pages/UploadResumeModalWrapper';
 import ApplicationDetail from './components/ApplicationDetail';
 import EditJob from './pages/EditJob';
+import JobDetails from './pages/JobDetails';
 
 
 const App: React.FC = () => {
@@ -39,6 +40,7 @@ const App: React.FC = () => {
             <Route path="job/upload/:jobId" element={<UploadResumeModalWrapper />} />
             <Route path="job/applicant/:jobId" element={<ApplicationDetail />} />
             <Route path="/editjob/:id" element={<EditJob />} />
+            <Route path="/jobdetail/:id" element={<JobDetails />} />
           </Route>
 
           

@@ -6,11 +6,12 @@ import {
   Typography,
   Container,
   CircularProgress,
-  Alert,
   Stack,
   MenuItem,
   IconButton,
   InputAdornment,
+  Snackbar,
+  Slide,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
@@ -66,6 +67,7 @@ const CreateJob: React.FC = () => {
       );
 
       setMessage({ type: 'success', text: 'Job created successfully!' });
+
       setJobTitle('');
       setJobDescription('');
       setScreeningPrompt('');
@@ -74,7 +76,10 @@ const CreateJob: React.FC = () => {
       setLocation('');
       setAIPrompt('');
       setShowAIPrompt(false);
-      navigate('/alljobs');
+
+      setTimeout(() => {
+        navigate('/alljobs');
+      }, 1000);
     } catch (error: any) {
       const errMsg = error.response?.data?.message || error.message || 'Failed to submit job';
       setMessage({ type: 'error', text: errMsg });
@@ -92,12 +97,8 @@ const CreateJob: React.FC = () => {
 
     setIsGenerating(true);
     try {
-      // Simulate an AI API call with a delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Replace with actual response from backend AI agent
       const generatedText = `AI Generated description for prompt: "${aiPrompt}"`;
-
       setJobDescription(generatedText);
     } catch (err) {
       console.error('AI generation failed', err);
@@ -126,11 +127,14 @@ const CreateJob: React.FC = () => {
         Bigstep HR Assistant - Create Job
       </Typography>
 
-      {message && (
-        <Alert severity={message.type} sx={{ mb: 2 }}>
-          {message.text}
-        </Alert>
-      )}
+      <Snackbar
+        open={!!message}
+        onClose={() => setMessage(null)}
+        autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        TransitionComponent={(props) => <Slide {...props} direction="down" />}
+        message={message?.text}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>

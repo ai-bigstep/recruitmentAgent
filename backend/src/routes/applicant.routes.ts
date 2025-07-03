@@ -6,6 +6,6 @@ import catchAsync from '../utils/catchAsync';
 
 const router = express.Router();
 
-router.get('/job/:jobId',validate(applicationSchema), catchAsync(getApplicantsByJob)); // 👈 Add this line
+router.get('/job/:jobId', catchAsync(getApplicantsByJob)); // 👈 Add this line
 
 export default router;

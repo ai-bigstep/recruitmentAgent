@@ -14,15 +14,7 @@ import {
 } from '@mui/material';
 import { Edit, Trash2, MoreVertical } from 'lucide-react';
 import { useTheme } from '@mui/material/styles';
-
 import { useNavigate } from 'react-router-dom';
-
-// Inside JobCard component:
-
-
-
-
-
 
 interface JobCardProps {
   title: string;
@@ -48,12 +40,15 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
   return (
     <Card
       sx={{
-        maxWidth: 360,
-        width: '100%',
+        width: 320,
+        height: 320,
         borderRadius: 3,
         boxShadow: 4,
         position: 'relative',
         bgcolor: 'background.paper',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
       }}
     >
       <Box position="absolute" top={8} right={8}>
@@ -63,21 +58,28 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
       </Box>
 
       <CardContent>
-        {/* Title Centered */}
+        {/* Title */}
         <Typography
-  variant="body1"
-  align="center"
-  fontWeight="bold"
-  gutterBottom
-  sx={{
-    color: theme.palette.primary.main,
-    fontSize: '1.25rem',
-    lineHeight: 1.5,
-    mb: 2,
-  }}
->
-  {title}
-</Typography>
+          variant="body1"
+          align="center"
+          gutterBottom
+          sx={{
+            color: theme.palette.primary.main,
+            fontSize: '1.25rem',
+            fontWeight: 'bold',
+            mb: 2,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-word',
+            textAlign: 'center',
+            minHeight: '3rem',
+          }}
+        >
+          {title}
+        </Typography>
 
         <Divider sx={{ mb: 3 }} />
 
@@ -105,14 +107,14 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
         {/* Action Buttons */}
         <Stack direction="row" spacing={1} mt={4}>
           <Button
-            onClick={() => navigate(`/editjob/${jobId}`)}
+            onClick={() => navigate(`/jobdetail/${jobId}`)}
             variant="outlined"
             startIcon={<Edit size={16} />}
             fullWidth
             size="small"
             sx={{ borderColor: 'primary.main', color: 'primary.main' }}
           >
-            Edit
+            View Details
           </Button>
           <Button
             variant="outlined"
@@ -135,9 +137,12 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={() => {navigate(`/job/applicant/${jobId}`);}}>View Applicants</MenuItem>
-        <MenuItem onClick={() => {navigate(`/job/upload/${jobId}`);}}>Upload Resume</MenuItem>
-        
+        <MenuItem onClick={() => navigate(`/job/applicant/${jobId}`)}>
+          View Applicants
+        </MenuItem>
+        <MenuItem onClick={() => navigate(`/job/upload/${jobId}`)}>
+          Upload Resume
+        </MenuItem>
       </Menu>
     </Card>
   );
