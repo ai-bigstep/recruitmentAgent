@@ -23,3 +23,11 @@ def update_application_status(application_id, status):
     stmt = update(applications).where(applications.c.id == application_id).values(status=status)
     session.execute(stmt)
     session.commit()
+
+def get_pending_applications_by_job_id(job_id):
+    results = session.execute(
+        select(applications).where(
+            (applications.c.job_id == job_id) & (applications.c.status == 'pending')
+        )
+    ).fetchall()
+    return [dict(row._mapping) for row in results]
