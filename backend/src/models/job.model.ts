@@ -8,15 +8,15 @@ interface JobAttributes {
   description: string;
   screening_questions_prompt?: string;
   ats_calculation_prompt?: string;
-  type: 'full_time' | 'freelance';
+  type: 'Full Time' | 'Freelance';
   location: string;
   is_active: string;
   is_published: boolean;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'queued' | 'completed' | 'failed';
   user_id: string;
 }
 
-type JobCreationAttributes = Optional<JobAttributes, 'id' | 'screening_questions_prompt' | 'ats_calculation_prompt' | 'is_active' | 'is_published' | 'type' | 'location' | 'user_id' | 'status'>;
+type JobCreationAttributes = Optional<JobAttributes, 'id' | 'is_active' | 'is_published' |  'user_id' | 'status'>;
 
 class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttributes {
   public id!: string;
@@ -24,12 +24,12 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
   public description!: string;
   public screening_questions_prompt?: string;
   public ats_calculation_prompt?: string;
-  public type!: 'full_time' | 'freelance';
+  public type!: 'Full Time' | 'Freelance';
   public location!: string;
   public is_active!: string;
   public is_published!: boolean;
   public user_id!: string;
-  public status!: 'pending' | 'processing' | 'completed' | 'failed';
+  public status!: 'pending' | 'queued' | 'completed' | 'failed';
 
 
   public readonly createdAt!: Date;
@@ -53,19 +53,19 @@ Job.init(
     },
     screening_questions_prompt: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
     ats_calculation_prompt: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM('full_time', 'freelance'),
-      allowNull: true,
+      type: DataTypes.ENUM('Full Time', 'Freelance'),
+      allowNull: false,
     },
     location: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     is_active: {
       type: DataTypes.BOOLEAN,
@@ -78,7 +78,7 @@ Job.init(
       defaultValue: true,
     },
     status: {
-      type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed'),
+      type: DataTypes.ENUM('pending', 'queued', 'completed', 'failed'),
       allowNull: true,
       defaultValue: 'pending',
     },
