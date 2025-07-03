@@ -74,29 +74,25 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
         resume_url: s3Key,
         status: 'pending',
       });
+    }
 
-      // Step 5: Send message to SQS
-      const messageCommand = new SendMessageCommand({
-        QueueUrl: QUEUE_URL,
-        MessageBody: 'ResumeToProcess',
-        MessageAttributes: {
-          ApplicationID: {
-            DataType: 'String',
-            StringValue: application.id.toString(),
-          },
-          FileID: {
-            DataType: 'String',
-            StringValue: fileId.toString(),
-          },
+    // Step 5: Send message to SQS
+    const messageCommand = new SendMessageCommand({
+      QueueUrl: QUEUE_URL,
+      MessageBody: 'JobToProcess',
+      MessageAttributes: {
+        job_id: {
+          DataType: 'String',
+          StringValue: job_id,
         },
-      });
+      },
+    });
 
-      try {
-        await sqs.send(messageCommand);
-        console.log(`Enqueued resume for applicant ID ${application.id} and resume ID ${fileId} to SQS`);
-      } catch (err) {
-        console.error('Error sending SQS message:', err);
-      }
+    try {
+      await sqs.send(messageCommand);
+      console.log(`Enqueued all resumes for job ID ${job_id} to SQS`);
+    } catch (err) {
+      console.error('Error sending SQS message:', err);
     }
 
     // Step 6: Clean up ZIP file from disk

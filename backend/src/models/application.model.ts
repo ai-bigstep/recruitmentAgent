@@ -24,6 +24,7 @@ interface CandidateAttributes {
   is_accepted?: boolean;
   job_id: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
+  is_deleted?: boolean;
 }
 
 type CandidateCreationAttributes = Optional<
@@ -35,6 +36,7 @@ type CandidateCreationAttributes = Optional<
   | 'call_analysis'
   | 'is_accepted'
   | 'status'
+  | 'is_deleted'
 >;
 
 class Application
@@ -54,6 +56,7 @@ class Application
   public is_accepted?: boolean;
   public job_id!: string;
   public status!: 'pending' | 'processing' | 'completed' | 'failed';
+  public is_deleted?: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -138,6 +141,11 @@ Application.init(
         key: 'id',
       },
       onDelete: 'CASCADE',
+    },
+    is_deleted: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {
