@@ -52,7 +52,7 @@ def poll_sqs():
                     }
 
                     try:
-                        res = requests.post(API_ENDPOINT, json=payload, timeout=30)
+                        res = requests.post(RESUME_API_ENDPOINT, json=payload, timeout=30)
                         res.raise_for_status()
                         print(f"✅ Successfully processed job {job_id}")
                     except requests.RequestException as err:

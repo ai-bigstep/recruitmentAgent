@@ -17,6 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Job {
   title: string;
@@ -109,17 +110,51 @@ const EditJob: React.FC = () => {
     setShowAIPrompt(true);
   };
 
+  const pollForJD = async (jobId: string) => {
+    let attempts = 0;
+    const maxAttempts = 30;
+    const token = localStorage.getItem('token');
+    while (attempts < maxAttempts) {
+      const res = await fetch(`http://localhost:5000/api/jobs/${jobId}/jd-result`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (res.status === 204) {
+        // No content yet, keep polling
+      } else if (res.ok) {
+        const data = await res.json();
+        if (data && data.job_description) {
+          setJobDescription(data.job_description);
+          setIsGenerating(false);
+          return;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      attempts++;
+    }
+    setIsGenerating(false);
+    setMessage({ type: 'error', text: 'AI generation timed out.' });
+  };
+
   const handleGenerateFromPrompt = async () => {
     if (!aiPrompt.trim()) return;
     setIsGenerating(true);
+    const jobId = id || uuidv4();
+    const token = localStorage.getItem('token');
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const aiGenerated = `AI-generated description for prompt: "${aiPrompt}"`;
-      setJobDescription(aiGenerated);
+      await fetch(`http://localhost:5000/api/jobs/${jobId}/jd-generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jd_prompt: aiPrompt }),
+      });
+      pollForJD(jobId);
     } catch (err) {
-      console.error('AI generation failed:', err);
-    } finally {
       setIsGenerating(false);
+      setMessage({ type: 'error', text: 'Failed to enqueue AI generation.' });
     }
   };
 

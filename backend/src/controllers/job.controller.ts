@@ -39,7 +39,9 @@ export const getJobsByRecruiter = async (req: AuthRequest, res: Response) => {
       {
         model: Application,
         as: 'candidates',
-        attributes: ['id'], // Only fetch IDs to count
+        attributes: ['id'], // Only fetch IDs
+        where: { is_deleted: false }, // Only include not-deleted
+        required: false, // So jobs with 0 candidates are still included
       },
     ],
   });

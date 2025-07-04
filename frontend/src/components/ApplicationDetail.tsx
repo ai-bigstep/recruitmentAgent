@@ -64,23 +64,45 @@ const ApplicationDetail: React.FC = () => {
     console.log(`Calling candidate ID ${id}...`);
   };
 
-  const handleShortlistToggle = (id: string, isAccepted: boolean) => {
-    setRows((prev) =>
-      prev.map((row) =>
-        row.id === id ? { ...row, is_accepted: isAccepted } : row
-      )
-    );
-    setShortlistDisabled((prev) => new Set(prev).add(id));
-  };
-
-  const handleRatingChange = (id: string, newRating: number | null) => {
-    if (newRating !== null) {
+  const handleShortlistToggle = async (id: string, isAccepted: boolean) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_accepted: isAccepted }),
+      });
+      if (!res.ok) throw new Error('Failed to update applicant');
       setRows((prev) =>
         prev.map((row) =>
-          row.id === id ? { ...row, rating: newRating } : row
+          row.id === id ? { ...row, is_accepted: isAccepted } : row
         )
       );
-      setRatedCandidates((prev) => new Set(prev).add(id));
+      setShortlistDisabled((prev) => new Set(prev).add(id));
+    } catch (err) {
+      alert('Failed to update applicant.');
+      console.error(err);
+    }
+  };
+
+  const handleRatingChange = async (id: string, newRating: number | null) => {
+    if (newRating !== null) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating: newRating }),
+        });
+        if (!res.ok) throw new Error('Failed to update applicant');
+        setRows((prev) =>
+          prev.map((row) =>
+            row.id === id ? { ...row, rating: newRating } : row
+          )
+        );
+        setRatedCandidates((prev) => new Set(prev).add(id));
+      } catch (err) {
+        alert('Failed to update applicant.');
+        console.error(err);
+      }
     }
   };
 
@@ -214,43 +236,30 @@ const ApplicationDetail: React.FC = () => {
       width: 200,
       sortable: false,
       renderCell: (params: GridRenderCellParams) => {
-        const { id, is_accepted } = params.row;
-        const isDisabled = shortlistDisabled.has(id);
-
-        if (isDisabled) {
+        const { is_accepted } = params.row;
+        if (is_accepted === true) {
           return (
             <Typography
               variant="body2"
-              color={is_accepted ? 'green' : 'red'}
+              color="green"
               sx={{ fontWeight: 600, mt: 2 }}
             >
-              {is_accepted ? 'Shortlisted' : 'Rejected'}
+              Shortlisted
             </Typography>
           );
+        } else if (is_accepted === false) {
+          return (
+            <Typography
+              variant="body2"
+              color="red"
+              sx={{ fontWeight: 600, mt: 2 }}
+            >
+              Rejected
+            </Typography>
+          );
+        } else {
+          return null;
         }
-
-        return (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={() => handleShortlistToggle(id, true)}
-              size="small"
-              sx={{ height: '30px', fontSize: '0.75rem', minWidth: 0, mt: 1 }}
-            >
-              Shortlist
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => handleShortlistToggle(id, false)}
-              size="small"
-              sx={{ height: '30px', fontSize: '0.75rem', minWidth: 0, mt: 1 }}
-            >
-              Reject
-            </Button>
-          </div>
-        );
       },
     },
   ];
@@ -285,10 +294,63 @@ const ApplicationDetail: React.FC = () => {
         </Button>
         {selectedIdArray.length > 0 && (
           <>
-            
             <IconButton aria-label="delete" color="error" onClick={handleDeleteSelected}>
               <DeleteIcon />
             </IconButton>
+            <Button
+              variant="contained"
+              color="success"
+              size="small"
+              onClick={async () => {
+                // Bulk shortlist
+                try {
+                  await Promise.all(selectedIdArray.map(async (id) => {
+                    const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ is_accepted: true }),
+                    });
+                    if (!res.ok) throw new Error(`Failed to shortlist applicant with id ${id}`);
+                  }));
+                  setRows((prev) => prev.map((row) =>
+                    selectedIdArray.includes(row.id) ? { ...row, is_accepted: true } : row
+                  ));
+                } catch (err) {
+                  alert('Failed to shortlist one or more applicants.');
+                  console.error(err);
+                }
+              }}
+              sx={{ ml: 1 }}
+            >
+              Shortlist
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={async () => {
+                // Bulk reject
+                try {
+                  await Promise.all(selectedIdArray.map(async (id) => {
+                    const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ is_accepted: false }),
+                    });
+                    if (!res.ok) throw new Error(`Failed to reject applicant with id ${id}`);
+                  }));
+                  setRows((prev) => prev.map((row) =>
+                    selectedIdArray.includes(row.id) ? { ...row, is_accepted: false } : row
+                  ));
+                } catch (err) {
+                  alert('Failed to reject one or more applicants.');
+                  console.error(err);
+                }
+              }}
+              sx={{ ml: 1 }}
+            >
+              Reject
+            </Button>
           </>
         )}
       </Box>

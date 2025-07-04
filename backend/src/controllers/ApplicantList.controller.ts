@@ -34,3 +34,21 @@ export const softDeleteApplicant = async (req: Request, res: Response) => {
   }
 };
 
+export const updateApplicant = async (req: Request, res: Response) => {
+  const { applicantId } = req.params;
+  const { is_accepted, rating } = req.body;
+  try {
+    const [affectedRows] = await Application.update(
+      { ...(is_accepted !== undefined ? { is_accepted } : {}), ...(rating !== undefined ? { rating } : {}) },
+      { where: { id: applicantId } }
+    );
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: 'Applicant not found' });
+    }
+    return res.status(200).json({ message: 'Applicant updated successfully' });
+  } catch (error) {
+    console.error('Error updating applicant:', error);
+    return res.status(500).json({ message: 'Failed to update applicant' });
+  }
+};
+
