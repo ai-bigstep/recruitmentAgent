@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Snackbar, Alert } from '@mui/material';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,13 +10,22 @@ const Register = () => {
     email: '',
     password: '',
   });
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'error' | 'success';
+  }>({ open: false, message: '', severity: 'error' });
 
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const handleSnackbarClose = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -25,22 +34,59 @@ const Register = () => {
     });
   };
 
+  const validateEmail = (email: string) => {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!validateEmail(formData.email)) {
+      setSnackbar({
+        open: true,
+        message: 'Please enter a valid email address',
+        severity: 'error',
+      });
+      return;
+    }
+
     if (formData.password !== confirmPassword) {
-      toast.error("Passwords don't match");
+      setSnackbar({
+        open: true,
+        message: "Passwords don't match",
+        severity: 'error',
+      });
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      setSnackbar({
+        open: true,
+        message: 'Password must be at least 6 characters',
+        severity: 'error',
+      });
       return;
     }
 
     setLoading(true);
     const success = await register(formData);
-    if (success) navigate('/login');
+
+    if (success) {
+      setSnackbar({
+        open: true,
+        message: 'Account created successfully!',
+        severity: 'success',
+      });
+      setTimeout(() => navigate('/'), 1500);
+    } else {
+      setSnackbar({
+        open: true,
+        message: 'Registration failed. Please try again.',
+        severity: 'error',
+      });
+    }
+
     setLoading(false);
   };
 
@@ -53,7 +99,7 @@ const Register = () => {
             <p className="mt-2 text-sm text-gray-300">Create your account to get started</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-200 mb-2">
                 Full Name
@@ -64,11 +110,11 @@ const Register = () => {
                   id="name"
                   name="name"
                   type="text"
-                  required
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your full name"
+                  required
                 />
               </div>
             </div>
@@ -82,12 +128,12 @@ const Register = () => {
                 <input
                   id="email"
                   name="email"
-                  type="email"
-                  required
+                  type="text"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your email"
+                  required
                 />
               </div>
             </div>
@@ -102,11 +148,11 @@ const Register = () => {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  required
                   value={formData.password}
                   onChange={handleChange}
                   className="w-full pl-10 pr-12 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Create a password"
+                  required
                 />
                 <button
                   type="button"
@@ -128,11 +174,11 @@ const Register = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-10 pr-12 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Confirm your password"
+                  required
                 />
                 <button
                   type="button"
@@ -147,7 +193,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition duration-200 disabled:opacity-50"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
@@ -163,6 +209,22 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={handleSnackbarClose}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

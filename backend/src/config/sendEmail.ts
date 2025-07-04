@@ -21,13 +21,11 @@ export const sendEmail = async ({ to, subject, html }: EmailOptions) => {
 
     // Send email
     const info = await transporter.sendMail({
-      from: `"Your App Name" <${process.env.SMTP_USER}>`,
+      from: `"Big Step" <${process.env.SMTP_USER}>`,
       to,
       subject,
       html,
     });
-
-    console.log('Email sent:', info.messageId);
     return info;
   } catch (error) {
     console.error('Error sending email:', error);

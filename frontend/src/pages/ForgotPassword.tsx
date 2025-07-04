@@ -1,23 +1,69 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Snackbar, Alert } from '@mui/material';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'error' | 'success';
+  }>({ open: false, message: '', severity: 'error' });
+
+  const validateEmail = (email: string) => {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
+    if (!email) {
+      setSnackbar({
+        open: true,
+        message: 'Email is required.',
+        severity: 'error',
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setSnackbar({
+        open: true,
+        message: 'Please enter a valid email address.',
+        severity: 'error',
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Adjust endpoint according to your backend route
-      
       await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
       setSubmitted(true);
+      setSnackbar({
+        open: true,
+        message: 'Password reset link sent to your email.',
+        severity: 'success',
+      });
     } catch (err) {
-        console.error('Error sending reset link:', err);
-      setError('Failed to send reset link. Please try again.');
+      console.error('Error sending reset link:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to send reset link. Please try again.',
+        severity: 'error',
+      });
     }
+
+    setLoading(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -39,20 +85,20 @@ const ForgotPassword = () => {
                   Email Address
                 </label>
                 <input
-                  type="email"
-                  required
+                  type="text" // ✅ no browser validation
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="you@example.com"
                 />
               </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
               >
-                Send Reset Link
+                {loading ? 'Submitting...' : 'Send Reset Link'}
               </button>
             </form>
           )}
@@ -64,6 +110,18 @@ const ForgotPassword = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} onClose={handleSnackbarClose} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

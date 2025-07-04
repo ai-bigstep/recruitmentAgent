@@ -9,7 +9,8 @@ import {
   Typography,
   Box,
   Snackbar,
-  Alert,
+  Slide,
+  Alert
 } from '@mui/material';
 import axios from 'axios';
 
@@ -23,19 +24,30 @@ const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, jo
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [uploading, setUploading] = useState<boolean>(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [snackbar, setSnackbar] = useState<{
+      open: boolean;
+      message: string;
+      severity: 'error' | 'success';
+      redirectAfterClose?: boolean;
+    }>({
+      open: false,
+      message: '',
+      severity: 'error',
+      redirectAfterClose: false,
+    });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.name.endsWith('.zip')) {
       setFile(selectedFile);
     } else {
-      setSnackbarMessage('Please select a .zip file.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
       setFile(null);
+      setSnackbar({
+        open: true,
+        message: 'Please upload a valid ZIP file.',
+        severity: 'error',
+      });
     }
   };
 
@@ -68,27 +80,33 @@ const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, jo
       );
 
       if (response.status === 200) {
-        setSnackbarMessage('Upload complete and resumes processed successfully!');
-        setSnackbarSeverity('success');
-        setSnackbarOpen(true);
-        onClose(); // close modal
-        setFile(null);
-        setProgress(0);
+        setSnackbar({
+        open: true,
+        message: 'Resume upload successfully.',
+        severity: 'success',
+      });
+
+        setTimeout(() => {
+          onClose();
+          setFile(null);
+          setProgress(0);
+        }, 3000);
       } else {
         throw new Error('Server responded with failure.');
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      setSnackbarMessage('Upload failed. Please try again.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+      setSnackbar({
+        open: true,
+        message: 'Failed to upload resume. Please try again.',
+        severity: 'error',
+      });
     } finally {
       setUploading(false);
     }
   };
-
   const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
+    setMessage(null);
   };
 
   return (
@@ -116,15 +134,19 @@ const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, jo
       </Dialog>
 
       <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+              open={snackbar.open}
+              autoHideDuration={4000}
+              onClose={handleCloseSnackbar}
+              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+              <Alert
+                severity={snackbar.severity}
+                onClose={handleCloseSnackbar}
+                sx={{ width: '100%' }}
+              >
+                {snackbar.message}
+              </Alert>
+            </Snackbar>
     </>
   );
 };

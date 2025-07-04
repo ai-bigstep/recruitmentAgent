@@ -56,8 +56,8 @@ const CreateJob: React.FC = () => {
           description: jobDescription,
           screening_questions_prompt: screeningPrompt,
           ats_calculation_prompt: atsPrompt,
-          type: type,
-          location: location,
+          type,
+          location,
         },
         {
           headers: {
@@ -146,25 +146,24 @@ const CreateJob: React.FC = () => {
             required
           />
 
-          <Box position="relative">
+          <Stack spacing={1}>
             <TextField
               label="Job Description"
               value={isGenerating ? 'Typing...' : jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               multiline
-              minRows={4}
+              rows={6}
               fullWidth
               required
+              placeholder="Enter job description or generate with AI"
+              inputProps={{ style: { overflow: 'auto' } }}
             />
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleAIGenerate}
-              sx={{ position: 'absolute', top: 8, right: 8 }}
-            >
-              Use AI
-            </Button>
-          </Box>
+            <Box textAlign="right">
+              <Button variant="outlined" size="small" onClick={handleAIGenerate}>
+                Use AI
+              </Button>
+            </Box>
+          </Stack>
 
           {showAIPrompt && (
             <TextField
@@ -197,22 +196,29 @@ const CreateJob: React.FC = () => {
           )}
 
           <TextField
-            label="Screening Questions Prompt"
-            value={screeningPrompt}
-            onChange={(e) => setScreeningPrompt(e.target.value)}
-            multiline
-            minRows={3}
-            fullWidth
-          />
+  label="Screening Questions Prompt"
+  value={screeningPrompt}
+  onChange={(e) => setScreeningPrompt(e.target.value)}
+  multiline
+  rows={4} // fixed height
+  fullWidth
+  inputProps={{
+    style: { overflow: 'auto' },
+  }}
+/>
 
-          <TextField
-            label="ATS Calculation Prompt"
-            value={atsPrompt}
-            onChange={(e) => setATSPrompt(e.target.value)}
-            multiline
-            minRows={3}
-            fullWidth
-          />
+<TextField
+  label="ATS Calculation Prompt"
+  value={atsPrompt}
+  onChange={(e) => setATSPrompt(e.target.value)}
+  multiline
+  rows={4} // fixed height
+  fullWidth
+  inputProps={{
+    style: { overflow: 'auto' },
+  }}
+/>
+
 
           <TextField
             label="Type"
@@ -230,7 +236,7 @@ const CreateJob: React.FC = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             multiline
-            minRows={3}
+            minRows={1}
             fullWidth
           />
 
