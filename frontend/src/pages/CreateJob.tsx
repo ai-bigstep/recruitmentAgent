@@ -166,23 +166,25 @@ const CreateJob: React.FC = () => {
           </Stack>
 
           {showAIPrompt && (
-            <TextField
-              label="Enter prompt for AI"
-              value={aiPrompt}
-              onChange={(e) => setAIPrompt(e.target.value)}
-              fullWidth
-              multiline
-              minRows={2}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleCloseAIPrompt}>
-                      <CloseIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              helperText={
+            <Stack spacing={1}>
+              <TextField
+                label="Enter prompt for AI"
+                value={aiPrompt}
+                onChange={(e) => setAIPrompt(e.target.value)}
+                fullWidth
+                multiline
+                minRows={2}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleCloseAIPrompt}>
+                        <CloseIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Box textAlign="right">
                 <Button
                   size="small"
                   variant="contained"
@@ -191,34 +193,29 @@ const CreateJob: React.FC = () => {
                 >
                   Generate
                 </Button>
-              }
-            />
+              </Box>
+            </Stack>
           )}
 
           <TextField
-  label="Screening Questions Prompt"
-  value={screeningPrompt}
-  onChange={(e) => setScreeningPrompt(e.target.value)}
-  multiline
-  rows={4} // fixed height
-  fullWidth
-  inputProps={{
-    style: { overflow: 'auto' },
-  }}
-/>
+            label="Screening Questions Prompt"
+            value={screeningPrompt}
+            onChange={(e) => setScreeningPrompt(e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+            inputProps={{ style: { overflow: 'auto' } }}
+          />
 
-<TextField
-  label="ATS Calculation Prompt"
-  value={atsPrompt}
-  onChange={(e) => setATSPrompt(e.target.value)}
-  multiline
-  rows={4} // fixed height
-  fullWidth
-  inputProps={{
-    style: { overflow: 'auto' },
-  }}
-/>
-
+          <TextField
+            label="ATS Calculation Prompt"
+            value={atsPrompt}
+            onChange={(e) => setATSPrompt(e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+            inputProps={{ style: { overflow: 'auto' } }}
+          />
 
           <TextField
             label="Type"
