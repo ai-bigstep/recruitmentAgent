@@ -5,6 +5,9 @@ import {
   getJobById,
   updateJob,
   deleteJob,
+  enqueueJDGeneration,
+  getJDResult,
+  saveJDResult,
 } from '../controllers/job.controller';
 
 import { authenticateToken } from '../middleware/auth.middleware';
@@ -28,6 +31,9 @@ router.get('/', authenticateToken, catchAsync(getJobsByRecruiter));
 router.get('/:id', authenticateToken, catchAsync(getJobById));
 router.put('/:id', authenticateToken,validate(jobSchema), catchAsync(updateJob));
 router.delete('/:id', authenticateToken, catchAsync(deleteJob));
+router.post('/:jobId/jd-generate', authenticateToken, catchAsync(enqueueJDGeneration));
+router.get('/:jobId/jd-result', authenticateToken, catchAsync(getJDResult));
+router.post('/:jobId/jd-result', authenticateToken, catchAsync(saveJDResult));
 
 // File upload route
 router.post(

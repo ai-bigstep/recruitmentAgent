@@ -12,6 +12,7 @@ from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams
 
 # from google.adk.guardrails.guardrail import Guardrail
 from ..prompts.resume_extractor_prompt import prompt_resume_extractor
+from ..prompts.jd_generator_prompt import prompt_jd_generator
 
 
 # Configure logging
@@ -64,6 +65,9 @@ async def get_agent_async(purpose: str = "resume_extractor", extras: dict = {}):
         ).replace(
             "{{job_description}}", extras.get("job_description", "")
         )
+    elif purpose == "jd_generator":
+        logger.info("Creating agent for jd generation")
+        instruction = prompt_jd_generator
     # guardrail = godrej_guardrail if company == "godrej" else tata_guardrail
     root_agent = LlmAgent(
         model="gemini-2.0-flash-exp",

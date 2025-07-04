@@ -81,10 +81,10 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
       QueueUrl: QUEUE_URL,
       MessageBody: 'JobToProcess',
       MessageAttributes: {
-        job_id: {
-          DataType: 'String',
-          StringValue: job_id,
-        },
+        job_id: { DataType: 'String', StringValue: job_id },
+        type: { DataType: 'String', StringValue: 'resume' } // or 'jd_gen'
+        // For JD generation:
+        // jd_prompt: { DataType: 'String', StringValue: jd_prompt }
       },
     });
 

@@ -3,6 +3,13 @@ import Job from '../models/job.model';
 import { AuthRequest } from '../middleware/auth.middleware';
 import Application from '../models/application.model';
 import AppError from '../utils/AppError';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+
+// Temporary in-memory store for generated JDs
+const tempJDStore: { [jobId: string]: string } = {};
+
+const sqs = new SQSClient({ region: process.env.AWS_REGION || 'ap-south-1' });
+const QUEUE_URL = 'https://sqs.ap-south-1.amazonaws.com/474560118046/resumequeue';
 
 export const createJob = async (req: AuthRequest, res: Response) => {
   const { title, description, screening_questions_prompt, ats_calculation_prompt, type, location } = req.body;
@@ -77,4 +84,46 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
 
   await job.destroy();
   res.status(204).send();
+};
+
+
+export const enqueueJDGeneration = async (req: AuthRequest, res: Response) => {
+  const { jobId } = req.params;
+  const { jd_prompt } = req.body;
+  
+  // Get the auth token from the request headers
+  const authHeader = req.headers['authorization'] || '';
+
+  const messageCommand = new SendMessageCommand({
+    QueueUrl: QUEUE_URL,
+    MessageBody: 'JobToProcess',
+    MessageAttributes: {
+      job_id: { DataType: 'String', StringValue: jobId },
+      type: { DataType: 'String', StringValue: 'jd_gen' },
+      jd_prompt: { DataType: 'String', StringValue: jd_prompt },
+      auth_token: { DataType: 'String', StringValue: authHeader },
+    }
+  });
+  await sqs.send(messageCommand);
+  res.status(200).json({ message: 'JD generation enqueued' });
+};
+
+// SQS worker posts the result here
+export const saveJDResult = async (req: AuthRequest, res: Response) => {
+  console.log("Save JDResult called!!!!");
+  const { jobId } = req.params;
+  const { job_description } = req.body;
+  console.log(job_description)
+  tempJDStore[jobId] = job_description; // Store temporarily
+  res.status(200).json({ message: 'Job description saved temporarily' });
+};
+
+// Frontend polls this endpoint
+export const getJDResult = async (req: AuthRequest, res: Response) => {
+  const { jobId } = req.params;
+  const jd = tempJDStore[jobId];
+  console.log("GETJDRESULT CALLED");
+  console.log(jd);
+  if (!jd) return res.status(204).send(); // No content yet
+  res.status(200).json({ job_description: jd });
 };

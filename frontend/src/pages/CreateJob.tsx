@@ -16,6 +16,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 const CreateJob: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -30,6 +31,7 @@ const CreateJob: React.FC = () => {
   const [showAIPrompt, setShowAIPrompt] = useState(false);
   const [aiPrompt, setAIPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ const CreateJob: React.FC = () => {
     const token = localStorage.getItem('token');
 
     try {
-      await axios.post(
+      const response = await axios.post(
         'http://localhost:5000/api/jobs/',
         {
           title: jobTitle,
@@ -66,6 +68,7 @@ const CreateJob: React.FC = () => {
         }
       );
 
+      setJobId(response.data.id);
       setMessage({ type: 'success', text: 'Job created successfully!' });
 
       setJobTitle('');
@@ -92,18 +95,56 @@ const CreateJob: React.FC = () => {
     setShowAIPrompt(true);
   };
 
+  const pollForJD = async (jobId: string) => {
+    let attempts = 0;
+    const maxAttempts = 30;
+    const token = localStorage.getItem('token');
+    while (attempts < maxAttempts) {
+      const res = await fetch(`http://localhost:5000/api/jobs/${jobId}/jd-result`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (res.status === 204) {
+        // No content yet, keep polling
+      } else if (res.ok) {
+        const data = await res.json();
+        console.log("job description received: ");
+        console.log(data.job_description);
+        if (data && data.job_description) {
+          setJobDescription(data.job_description);
+          setIsGenerating(false);
+          return;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      attempts++;
+    }
+    setIsGenerating(false);
+    setMessage({ type: 'error', text: 'AI generation timed out.' });
+  };
+  
   const handleGenerateFromPrompt = async () => {
     if (!aiPrompt.trim()) return;
-
     setIsGenerating(true);
+
+    const currentJobId = jobId || uuidv4();
+    setJobId(currentJobId);
+    console.log("Insite handleGeneratefromprompt")
+    const token = localStorage.getItem('token');
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const generatedText = `AI Generated description for prompt: "${aiPrompt}"`;
-      setJobDescription(generatedText);
+      await fetch(`http://localhost:5000/api/jobs/${currentJobId}/jd-generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jd_prompt: aiPrompt }),
+      });
+      pollForJD(currentJobId);
     } catch (err) {
-      console.error('AI generation failed', err);
-    } finally {
       setIsGenerating(false);
+      setMessage({ type: 'error', text: 'Failed to enqueue AI generation.' });
     }
   };
 
