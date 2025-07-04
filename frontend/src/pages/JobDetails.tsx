@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -12,33 +12,32 @@ import {
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+
+const fetchJob = async (id: string | undefined) => {
+  const token = localStorage.getItem('token');
+  const res = await axios.get(`http://localhost:5000/api/jobs/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
 
 const JobDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [job, setJob] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchJob = async () => {
-      const token = localStorage.getItem('token');
-      try {
-        const res = await axios.get(`http://localhost:5000/api/jobs/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setJob(res.data);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to load job');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const {
+    data: job,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['job', id],
+    queryFn: () => fetchJob(id),
+    enabled: !!id,
+  });
 
-    fetchJob();
-  }, [id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
         <CircularProgress />
@@ -46,11 +45,11 @@ const JobDetails: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Container maxWidth="lg">
         <Alert severity="error" sx={{ mt: 4 }}>
-          {error}
+          {error instanceof Error ? error.message : 'Failed to load job'}
         </Alert>
       </Container>
     );
@@ -82,30 +81,22 @@ const JobDetails: React.FC = () => {
             <Typography fontWeight={600} gutterBottom>
               Description:
             </Typography>
-            
-              {job.description || '—'}
+            {job.description || '\u2014'}
           </Box>
-        
-
-         
 
           <Box>
             <Typography fontWeight={600} gutterBottom>
               Screening Questions Prompt:
             </Typography>
-            
-              {job.screening_questions_prompt || '—'}
-            
+            {job.screening_questions_prompt || '\u2014'}
           </Box>
 
           <Box>
             <Typography fontWeight={600} gutterBottom>
               ATS Calculation Prompt:
             </Typography>
-            
-              {job.ats_calculation_prompt || '—'}
-            </Box>
-          
+            {job.ats_calculation_prompt || '\u2014'}
+          </Box>
         </Stack>
 
         <Box mt={5} textAlign="center">
