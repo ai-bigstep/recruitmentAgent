@@ -11,6 +11,7 @@ import {
   Slide,
 } from '@mui/material';
 import JobCard from '../components/JobCard';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Job {
   id: string;
@@ -20,38 +21,32 @@ interface Job {
   candidates?: any[];
 }
 
+const fetchJobs = async () => {
+  const token = localStorage.getItem('token');
+  const response = await axios.get('http://localhost:5000/api/jobs/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
 const AllJobs: React.FC = () => {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/jobs/', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setJobs(response.data);
-      } catch (error) {
-        console.error('Failed to fetch jobs:', error);
-        setMessage({ type: 'error', text: 'Failed to load jobs' });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) {
-      fetchJobs();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+  const {
+    data: jobs = [],
+    isLoading: loading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['jobs', user?.id],
+    queryFn: fetchJobs,
+    enabled: !!user,
+  });
 
   const handleDelete = async (id: string) => {
     try {
@@ -61,7 +56,7 @@ const AllJobs: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setJobs(prev => prev.filter(job => job.id !== id));
+      queryClient.invalidateQueries({ queryKey: ['jobs', user?.id] });
       setMessage({ type: 'success', text: 'Job deleted successfully!' });
     } catch (error) {
       console.error('Error deleting job:', error);
@@ -98,8 +93,8 @@ const AllJobs: React.FC = () => {
         </Typography>
       ) : (
         <Grid container spacing={4} justifyContent="center">
-          {jobs.map((job) => (
-            <Grid item xs={12} md={4} key={job.id}>
+          {jobs.map((job: Job) => (
+            <Grid item xs={12} md={4} key={job.id as string}>
               <JobCard
                 title={job.title}
                 candidateCount={job.candidates?.length || 0}
