@@ -6,7 +6,7 @@ import AppError from '../utils/AppError';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 // Temporary in-memory store for generated JDs
-const tempJDStore: { [jobId: string]: string } = {};
+const tempJDStore: { [jobId: string]: { status: 'pending' | 'ready', job_description?: string } } = {};
 
 const sqs = new SQSClient({ region: process.env.AWS_REGION || 'ap-south-1' });
 const QUEUE_URL = 'https://sqs.ap-south-1.amazonaws.com/474560118046/resumequeue';
@@ -94,6 +94,8 @@ export const enqueueJDGeneration = async (req: AuthRequest, res: Response) => {
   // Get the auth token from the request headers
   const authHeader = req.headers['authorization'] || '';
 
+  tempJDStore[jobId] = { status: 'pending' };
+
   const messageCommand = new SendMessageCommand({
     QueueUrl: QUEUE_URL,
     MessageBody: 'JobToProcess',
@@ -110,20 +112,18 @@ export const enqueueJDGeneration = async (req: AuthRequest, res: Response) => {
 
 // SQS worker posts the result here
 export const saveJDResult = async (req: AuthRequest, res: Response) => {
-  console.log("Save JDResult called!!!!");
   const { jobId } = req.params;
   const { job_description } = req.body;
-  console.log(job_description)
-  tempJDStore[jobId] = job_description; // Store temporarily
+  tempJDStore[jobId] = { status: 'ready', job_description };
   res.status(200).json({ message: 'Job description saved temporarily' });
 };
 
 // Frontend polls this endpoint
 export const getJDResult = async (req: AuthRequest, res: Response) => {
   const { jobId } = req.params;
-  const jd = tempJDStore[jobId];
-  console.log("GETJDRESULT CALLED");
-  console.log(jd);
-  if (!jd) return res.status(204).send(); // No content yet
+  const entry = tempJDStore[jobId];
+  if (!entry || entry.status !== 'ready') return res.status(204).send();
+  const jd = entry.job_description;
+  delete tempJDStore[jobId];
   res.status(200).json({ job_description: jd });
 };
