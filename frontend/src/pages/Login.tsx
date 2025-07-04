@@ -1,50 +1,79 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Snackbar, Alert } from '@mui/material';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'error' | 'success';
+    redirectAfterClose?: boolean;
+  }>({
+    open: false,
+    message: '',
+    severity: 'error',
+    redirectAfterClose: false,
+  });
 
-  const { user, login, logout } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
 
+  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const validateEmail = (email: string) => {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateEmail(formData.email)) {
+      setSnackbar({
+        open: true,
+        message: 'Please enter a valid email address.',
+        severity: 'error',
+      });
+      return;
+    }
+
     setLoading(true);
     const success = await login(formData.email, formData.password);
-    if (success) navigate('/');
+
+    if (success) {
+      setSnackbar({
+        open: true,
+        message: 'Login successfull!',
+        severity: 'success',
+      });
+      setTimeout(() => navigate('/'), 1500);
+    } else {
+      setSnackbar({
+        open: true,
+        message: 'Invalid credentials. Please try again.',
+        severity: 'error',
+      });
+    }
+
     setLoading(false);
   };
 
-  if (user) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white space-y-4">
-        <h2 className="text-xl font-semibold">You're already logged in.</h2>
-        <button
-          onClick={() => {
-            logout();
-            navigate('/login');
-          }}
-          className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-md font-medium"
-        >
-          Logout
-        </button>
-      </div>
-    );
-  }
+  const handleCloseSnackbar = () => {
+    if (snackbar.redirectAfterClose) {
+      navigate('/');
+    } else {
+      setSnackbar((prev) => ({ ...prev, open: false }));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -55,7 +84,7 @@ const Login = () => {
             <p className="mt-2 text-sm text-gray-300">Sign in to your account</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
                 Email Address
@@ -65,7 +94,7 @@ const Login = () => {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   required
                   value={formData.email}
                   onChange={handleChange}
@@ -100,14 +129,15 @@ const Login = () => {
                 </button>
               </div>
             </div>
+
             <div className="text-right">
-  <Link
-    to="/forgot-password"
-    className="text-sm text-blue-400 hover:text-blue-600 font-medium"
-  >
-    Forgot password?
-  </Link>
-</div>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-400 hover:text-blue-600 font-medium"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
             <button
               type="submit"
@@ -120,7 +150,7 @@ const Login = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-400">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link to="/register" className="text-blue-400 hover:text-blue-600 font-medium">
                 Sign up here
               </Link>
@@ -128,6 +158,21 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={handleCloseSnackbar}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

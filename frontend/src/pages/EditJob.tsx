@@ -73,22 +73,17 @@ const EditJob: React.FC = () => {
           description: jobDescription,
           screening_questions_prompt: screeningPrompt,
           ats_calculation_prompt: atsPrompt,
-          type: type,
-          location: location,
+          type,
+          location,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       setMessage({ type: 'success', text: 'Job updated successfully!' });
 
-      // Delay navigation to allow toast to be visible
-      setTimeout(() => {
-        navigate('/alljobs');
-      }, 1000);
+      setTimeout(() => navigate('/alljobs'), 1000);
     } catch (error: any) {
       const errMsg = error.response?.data?.message || error.message || 'Failed to update job';
       setMessage({ type: 'error', text: errMsg });
@@ -103,7 +98,6 @@ const EditJob: React.FC = () => {
 
   const handleGenerateFromPrompt = async () => {
     if (!aiPrompt.trim()) return;
-
     setIsGenerating(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -155,25 +149,23 @@ const EditJob: React.FC = () => {
             required
           />
 
-          <Box position="relative">
+          <Stack spacing={1}>
             <TextField
               label="Job Description"
               value={isGenerating ? 'Typing...' : jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               multiline
-              minRows={4}
+              rows={6}
               fullWidth
               required
+              inputProps={{ style: { overflow: 'auto' } }}
             />
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleAIGenerate}
-              sx={{ position: 'absolute', top: 8, right: 8 }}
-            >
-              Use AI
-            </Button>
-          </Box>
+            <Box textAlign="right">
+              <Button variant="outlined" size="small" onClick={handleAIGenerate}>
+                Use AI
+              </Button>
+            </Box>
+          </Stack>
 
           {showAIPrompt && (
             <TextField
@@ -210,8 +202,9 @@ const EditJob: React.FC = () => {
             value={screeningPrompt}
             onChange={(e) => setScreeningPrompt(e.target.value)}
             multiline
-            minRows={3}
+            rows={4}
             fullWidth
+            inputProps={{ style: { overflow: 'auto' } }}
           />
 
           <TextField
@@ -219,8 +212,9 @@ const EditJob: React.FC = () => {
             value={atsPrompt}
             onChange={(e) => setATSPrompt(e.target.value)}
             multiline
-            minRows={3}
+            rows={4}
             fullWidth
+            inputProps={{ style: { overflow: 'auto' } }}
           />
 
           <TextField
@@ -239,8 +233,9 @@ const EditJob: React.FC = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             multiline
-            minRows={3}
+            rows={1}
             fullWidth
+            inputProps={{ style: { overflow: 'auto' } }}
           />
 
           <Box textAlign="center">
