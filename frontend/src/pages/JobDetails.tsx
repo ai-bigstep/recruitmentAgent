@@ -82,20 +82,10 @@ const JobDetails: React.FC = () => {
             <Typography fontWeight={600} gutterBottom>
               Description:
             </Typography>
-            <Box
-              sx={{
-                whiteSpace: 'pre-line',
-                p: 2,
-                backgroundColor: '#1e1e1e',
-                color: '#f5f5f5',
-                borderRadius: 2,
-                border: '1px solid #333',
-                fontSize: '0.95rem',
-              }}
-            >
+            
               {job.description || '—'}
-            </Box>
           </Box>
+        
 
          
 
@@ -103,39 +93,19 @@ const JobDetails: React.FC = () => {
             <Typography fontWeight={600} gutterBottom>
               Screening Questions Prompt:
             </Typography>
-            <Box
-              sx={{
-                whiteSpace: 'pre-line',
-                p: 2,
-                backgroundColor: '#1e1e1e',
-                color: '#f5f5f5',
-                borderRadius: 2,
-                border: '1px solid #333',
-                fontSize: '0.95rem',
-              }}
-            >
+            
               {job.screening_questions_prompt || '—'}
-            </Box>
+            
           </Box>
 
           <Box>
             <Typography fontWeight={600} gutterBottom>
               ATS Calculation Prompt:
             </Typography>
-            <Box
-              sx={{
-                whiteSpace: 'pre-line',
-                p: 2,
-                backgroundColor: '#1e1e1e',
-                color: '#f5f5f5',
-                borderRadius: 2,
-                border: '1px solid #333',
-                fontSize: '0.95rem',
-              }}
-            >
+            
               {job.ats_calculation_prompt || '—'}
             </Box>
-          </Box>
+          
         </Stack>
 
         <Box mt={5} textAlign="center">
