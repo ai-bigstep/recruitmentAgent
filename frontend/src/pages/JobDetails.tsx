@@ -48,31 +48,67 @@ const JobDetails: React.FC = () => {
 
   if (error) {
     return (
-      <Container maxWidth="md">
-        <Alert severity="error">{error}</Alert>
+      <Container maxWidth="lg">
+        <Alert severity="error" sx={{ mt: 4 }}>
+          {error}
+        </Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="md">
-      <Paper sx={{ p: 4, mt: 4, borderRadius: 4 }}>
-        <Typography variant="h5" fontWeight={600} gutterBottom>
+    <Container maxWidth="lg">
+      <Paper sx={{ p: 5, mt: 5, borderRadius: 4, bgcolor: 'background.default' }}>
+        <Typography variant="h5" fontWeight={600} gutterBottom color="primary">
           Job Details
         </Typography>
 
         <Divider sx={{ my: 2 }} />
 
-        <Stack spacing={2}>
-          <Typography><strong>Title:</strong> {job.title}</Typography>
-          <Typography><strong>Description:</strong> {job.description}</Typography>
-          <Typography><strong>Type:</strong> {job.type}</Typography>
-          <Typography><strong>Location:</strong> {job.location}</Typography>
-          <Typography><strong>Screening Prompt:</strong> {job.screening_questions_prompt}</Typography>
-          <Typography><strong>ATS Prompt:</strong> {job.ats_calculation_prompt}</Typography>
+        <Stack spacing={4}>
+          <Typography>
+            <strong>Title:</strong> {job.title}
+          </Typography>
+
+           <Typography>
+            <strong>Type:</strong> {job.type}
+          </Typography>
+
+          <Typography>
+            <strong>Location:</strong> {job.location}
+          </Typography>
+
+          <Box>
+            <Typography fontWeight={600} gutterBottom>
+              Description:
+            </Typography>
+            
+              {job.description || '—'}
+          </Box>
+        
+
+         
+
+          <Box>
+            <Typography fontWeight={600} gutterBottom>
+              Screening Questions Prompt:
+            </Typography>
+            
+              {job.screening_questions_prompt || '—'}
+            
+          </Box>
+
+          <Box>
+            <Typography fontWeight={600} gutterBottom>
+              ATS Calculation Prompt:
+            </Typography>
+            
+              {job.ats_calculation_prompt || '—'}
+            </Box>
+          
         </Stack>
 
-        <Box mt={4} textAlign="center">
+        <Box mt={5} textAlign="center">
           <Button
             variant="contained"
             color="primary"

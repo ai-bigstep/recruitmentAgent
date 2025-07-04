@@ -78,7 +78,7 @@ const Register = () => {
         message: 'Account created successfully!',
         severity: 'success',
       });
-      setTimeout(() => navigate('/'), 1500);
+      setTimeout(() => navigate('/login'), 1500);
     } else {
       setSnackbar({
         open: true,

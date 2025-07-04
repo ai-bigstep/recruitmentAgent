@@ -168,23 +168,25 @@ const EditJob: React.FC = () => {
           </Stack>
 
           {showAIPrompt && (
-            <TextField
-              label="Enter prompt for AI"
-              value={aiPrompt}
-              onChange={(e) => setAIPrompt(e.target.value)}
-              fullWidth
-              multiline
-              minRows={2}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleCloseAIPrompt}>
-                      <CloseIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              helperText={
+            <Stack spacing={1}>
+              <TextField
+                label="Enter prompt for AI"
+                value={aiPrompt}
+                onChange={(e) => setAIPrompt(e.target.value)}
+                fullWidth
+                multiline
+                minRows={2}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleCloseAIPrompt}>
+                        <CloseIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Box textAlign="right">
                 <Button
                   size="small"
                   variant="contained"
@@ -193,8 +195,8 @@ const EditJob: React.FC = () => {
                 >
                   Generate
                 </Button>
-              }
-            />
+              </Box>
+            </Stack>
           )}
 
           <TextField
