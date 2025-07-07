@@ -7,32 +7,12 @@ import { createTheme } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { AppProvider, type Navigation } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
+import { useAuth } from '../context/AuthContext';
 
-const navigation: Navigation = [
-  { kind: 'header', title: 'Main' },
-  {
-    segment: '',
-    title: 'Dashboard',
-    icon: <DashboardIcon />,
-    onClick: () => {},
-  },
-  { kind: 'divider' },
-  { kind: 'header', title: 'Jobs' },
-  {
-    segment: 'alljobs',
-    title: 'All Jobs',
-    icon: <BarChartIcon />,
-    onClick: () => {},
-  },
-  {
-    segment: 'createjob',
-    title: 'Create Job',
-    icon: <LayersIcon />,
-    onClick: () => {},
-  },
-];
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const demoTheme = createTheme({
   cssVariables: {
@@ -52,6 +32,38 @@ const demoTheme = createTheme({
 
 export default function DashboardLayoutBranding() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const navigation: Navigation = [
+    { kind: 'header', title: 'Main' },
+    {
+      segment: '',
+      title: 'Dashboard',
+      icon: <DashboardIcon />,
+    },
+    { kind: 'divider' },
+    { kind: 'header', title: 'Jobs' },
+    {
+      segment: 'alljobs',
+      title: 'All Jobs',
+      icon: <BarChartIcon />,
+    },
+    {
+      segment: 'createjob',
+      title: 'Create Job',
+      icon: <LayersIcon />,
+    },
+    // Add Create Recruiter option for superadmin
+    ...(user?.role === 'superadmin' ? [
+      { kind: 'divider' },
+      { kind: 'header', title: 'Admin' },
+      {
+        segment: 'register',
+        title: 'Create Recruiter',
+        icon: <PersonAddIcon />,
+      },
+    ] : []),
+  ];
 
   const updatedNavigation = navigation.map((item) => {
     if (item.kind || !item.segment) return item;

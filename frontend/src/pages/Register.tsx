@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Snackbar, Alert } from '@mui/material';
+import axios from 'axios';
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -20,8 +23,11 @@ const Register = () => {
     severity: 'error' | 'success';
   }>({ open: false, message: '', severity: 'error' });
 
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
+
+  // Check if current user is superadmin
+  const isSuperadmin = user?.role === 'superadmin';
 
   const handleSnackbarClose = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
@@ -70,19 +76,49 @@ const Register = () => {
     }
 
     setLoading(true);
-    const success = await register(formData);
 
-    if (success) {
+    try {
+      if (isSuperadmin) {
+        // Superadmin creating a recruiter - use different endpoint
+        const token = localStorage.getItem('token');
+        await axios.post(`${baseURL}/api/auth/create-recruiter`, {
+          ...formData,
+          role: 'recruiter'
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setSnackbar({
+          open: true,
+          message: 'Recruiter created successfully!',
+          severity: 'success',
+        });
+        setTimeout(() => navigate('/alljobs'), 1500);
+      } else {
+        // Regular user registration
+        const success = await register(formData);
+        if (success) {
+          setSnackbar({
+            open: true,
+            message: 'Account created successfully!',
+            severity: 'success',
+          });
+          setTimeout(() => navigate('/alljobs'), 1500);
+        } else {
+          setSnackbar({
+            open: true,
+            message: 'Registration failed. Please try again.',
+            severity: 'error',
+          });
+        }
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Operation failed. Please try again.';
       setSnackbar({
         open: true,
-        message: 'Account created successfully!',
-        severity: 'success',
-      });
-      setTimeout(() => navigate('/login'), 1500);
-    } else {
-      setSnackbar({
-        open: true,
-        message: 'Registration failed. Please try again.',
+        message: errorMessage,
         severity: 'error',
       });
     }
@@ -91,12 +127,16 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 -mt-20">
         <div className="bg-zinc-900 p-8 rounded-2xl shadow-2xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white">Join BigStep</h2>
-            <p className="mt-2 text-sm text-gray-300">Create your account to get started</p>
+            <h2 className="text-3xl font-bold text-white">
+              {isSuperadmin ? 'Create Recruiter' : 'Join BigStep'}
+            </h2>
+            <p className="mt-2 text-sm text-gray-300">
+              {isSuperadmin ? 'Create a new recruiter account' : 'Create your account to get started'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -113,7 +153,7 @@ const Register = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your full name"
+                  placeholder="Enter full name"
                   required
                 />
               </div>
@@ -132,7 +172,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your email"
+                  placeholder="Enter email address"
                   required
                 />
               </div>
@@ -195,18 +235,9 @@ const Register = () => {
               disabled={loading}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition duration-200 disabled:opacity-50"
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Creating...' : isSuperadmin ? 'Create Recruiter' : 'Create Account'}
             </button>
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-400">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-400 hover:text-blue-600 font-medium">
-                Log in here
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
 

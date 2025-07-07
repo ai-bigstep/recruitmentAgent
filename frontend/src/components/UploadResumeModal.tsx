@@ -14,6 +14,8 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 interface UploadResumeModalProps {
   open: boolean;
   onClose: () => void;
@@ -63,7 +65,7 @@ const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, jo
       setProgress(0);
 
       const response = await axios.post(
-        `http://localhost:5000/api/jobs/upload/${jobId}`,
+        `${baseURL}/api/jobs/upload/${jobId}`,
         formData,
         {
           headers: {

@@ -55,7 +55,7 @@ const Login = () => {
         message: 'Login successfull!',
         severity: 'success',
       });
-      setTimeout(() => navigate('/'), 1500);
+      setTimeout(() => navigate('/alljobs'), 1500);
     } else {
       setSnackbar({
         open: true,
@@ -148,14 +148,14 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          {/* <div className="mt-6 text-center">
             <p className="text-sm text-gray-400">
               Don&apos;t have an account?{' '}
               <Link to="/register" className="text-blue-400 hover:text-blue-600 font-medium">
                 Sign up here
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 

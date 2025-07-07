@@ -28,9 +28,11 @@ interface Job {
   location?: string;
 }
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const fetchJob = async (id: string | undefined): Promise<Job> => {
   const token = localStorage.getItem('token');
-  const res = await axios.get(`http://localhost:5000/api/jobs/${id}`, {
+  const res = await axios.get(`${baseURL}/api/jobs/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
@@ -83,7 +85,7 @@ const EditJob: React.FC = () => {
     const token = localStorage.getItem('token');
     try {
       await axios.put(
-        `http://localhost:5000/api/jobs/${id}`,
+        `${baseURL}/api/jobs/${id}`,
         {
           title: jobTitle,
           description: jobDescription,
@@ -115,7 +117,7 @@ const EditJob: React.FC = () => {
     const maxAttempts = 30;
     const token = localStorage.getItem('token');
     while (attempts < maxAttempts) {
-      const res = await fetch(`http://localhost:5000/api/jobs/${jobId}/jd-result`, {
+      const res = await fetch(`${baseURL}/api/jobs/${jobId}/jd-result`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -143,7 +145,7 @@ const EditJob: React.FC = () => {
     const jobId = id || uuidv4();
     const token = localStorage.getItem('token');
     try {
-      await fetch(`http://localhost:5000/api/jobs/${jobId}/jd-generate`, {
+      await fetch(`${baseURL}/api/jobs/${jobId}/jd-generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

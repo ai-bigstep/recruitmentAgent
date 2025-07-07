@@ -5,6 +5,7 @@ import AppError from '../utils/AppError'; // Custom error class
 import { sendEmail } from '../config/sendEmail'; 
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
+import { AuthRequest } from '../middleware/auth.middleware';
 
 import crypto from 'crypto';
 
@@ -101,4 +102,50 @@ export const resetPassword = async (req: Request, res: Response) => {
   await user.save();
 
   res.status(200).json({ message: 'Password successfully reset' });
+};
+
+export const createRecruiter = async (req: AuthRequest, res: Response) => {
+  const { name, email, password } = req.body;
+  const currentUser = req.user;
+
+  // Check if current user is superadmin
+  if (currentUser?.role !== 'superadmin') {
+    throw new AppError('Unauthorized: Only superadmin can create recruiters', 403);
+  }
+
+  const existing = await User.findOne({ where: { email } });
+  if (existing) throw new AppError('Email already exists', 400);
+
+  const user = await User.create({ name, email, password, role: 'recruiter' });
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Recruiter created successfully',
+    user: { 
+      id: user.id, 
+      name: user.name,
+      email: user.email, 
+      role: user.role 
+    },
+  });
+};
+
+export const createSuperadmin = async (req: Request, res: Response) => {
+  const { name, email, password } = req.body;
+
+  const existing = await User.findOne({ where: { email } });
+  if (existing) throw new AppError('Email already exists', 400);
+
+  const user = await User.create({ name, email, password, role: 'superadmin' });
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Superadmin created successfully',
+    user: { 
+      id: user.id, 
+      name: user.name,
+      email: user.email, 
+      role: user.role 
+    },
+  });
 };

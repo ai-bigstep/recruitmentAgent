@@ -19,11 +19,18 @@ interface Job {
   description: string;
   createdAt: string;
   candidates?: any[];
+  recruiter?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const fetchJobs = async () => {
   const token = localStorage.getItem('token');
-  const response = await axios.get('http://localhost:5000/api/jobs/', {
+  const response = await axios.get(`${baseURL}/api/jobs/`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -51,7 +58,7 @@ const AllJobs: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/jobs/${id}`, {
+      await axios.delete(`${baseURL}/api/jobs/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -100,6 +107,7 @@ const AllJobs: React.FC = () => {
                 candidateCount={job.candidates?.length || 0}
                 jobId={job.id}
                 onDelete={handleDelete}
+                recruiter={job.recruiter}
               />
             </Grid>
           ))}

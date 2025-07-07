@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -43,7 +45,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await axios.post(`${baseURL}/api/auth/forgot-password`, { email });
       setSubmitted(true);
       setSnackbar({
         open: true,
