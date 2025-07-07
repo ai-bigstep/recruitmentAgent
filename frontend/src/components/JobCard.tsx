@@ -15,19 +15,55 @@ import {
 import { Edit, Trash2, MoreVertical } from 'lucide-react';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface JobCardProps {
   title: string;
   candidateCount: number;
   jobId: string;
   onDelete: (id: string) => void;
+  recruiter?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
-const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
+const JobCard = ({ title, candidateCount, jobId, onDelete, recruiter }: JobCardProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const theme = useTheme();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Adjust dimensions based on user role
+  const isSuperadmin = !!recruiter;
+  const isRecruiter = user?.role === 'recruiter';
+  
+  let cardWidth, cardHeight, avatarSize, buttonSize, buttonPadding;
+  
+  if (isSuperadmin) {
+    // Superadmin - largest cards
+    cardWidth = 300;
+    cardHeight = 400;
+    avatarSize = 96;
+    buttonSize = 'small';
+    buttonPadding = 0.5;
+  } else if (isRecruiter) {
+    // Recruiter - medium cards
+    cardWidth = 290;
+    cardHeight = 340;
+    avatarSize = 88;
+    buttonSize = 'small';
+    buttonPadding = 0.4;
+  } else {
+    // Regular user - smallest cards
+    cardWidth = 280;
+    cardHeight = 350;
+    avatarSize = 80;
+    buttonSize = 'small';
+    buttonPadding = 0.3;
+  }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -40,8 +76,8 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
   return (
     <Card
       sx={{
-        width: 320,
-        height: 320,
+        width: cardWidth,
+        height: cardHeight,
         borderRadius: 3,
         boxShadow: 4,
         position: 'relative',
@@ -83,12 +119,24 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
 
         <Divider sx={{ mb: 3 }} />
 
+        {/* Recruiter Info for Superadmin */}
+        {recruiter && (
+          <Box display="flex" flexDirection="column" alignItems="center" gap={1} mb={2}>
+            <Typography variant="caption" color="text.secondary" textAlign="center">
+              Created by
+            </Typography>
+            <Typography variant="body2" color="primary" fontWeight="medium" textAlign="center">
+              {recruiter.name}
+            </Typography>
+          </Box>
+        )}
+
         {/* Candidate Avatar */}
         <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
           <Avatar
             sx={{
-              width: 96,
-              height: 96,
+              width: avatarSize,
+              height: avatarSize,
               bgcolor: 'primary.light',
               border: '2px solid',
               borderColor: 'primary.main',
@@ -107,24 +155,23 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
         {/* Action Buttons */}
         <Stack direction="row" spacing={1} mt={4}>
           <Button
-            onClick={() => navigate(`/jobdetail/${jobId}`)}
+            onClick={() => navigate(`/job/applicant/${jobId}`)}
             variant="outlined"
-            startIcon={<Edit size={16} />}
             fullWidth
-            size="small"
-            sx={{ borderColor: 'primary.main', color: 'primary.main' }}
+            size={buttonSize}
+            sx={{ borderColor: 'primary.main', color: 'primary.main', py: buttonPadding }}
           >
-            View Details
+            View Applicants
           </Button>
           <Button
             variant="outlined"
-            color="error"
-            startIcon={<Trash2 size={16} />}
+            color="secondary"
             fullWidth
-            size="small"
-            onClick={() => onDelete(jobId)}
+            size={buttonSize}
+            onClick={() => navigate(`/job/upload/${jobId}`)}
+            sx={{ py: buttonPadding }}
           >
-            Delete
+            Upload Resume
           </Button>
         </Stack>
       </CardContent>
@@ -137,11 +184,11 @@ const JobCard = ({ title, candidateCount, jobId, onDelete }: JobCardProps) => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={() => navigate(`/job/applicant/${jobId}`)}>
-          View Applicants
+        <MenuItem onClick={() => navigate(`/jobdetail/${jobId}`)}>
+          View Details
         </MenuItem>
-        <MenuItem onClick={() => navigate(`/job/upload/${jobId}`)}>
-          Upload Resume
+        <MenuItem onClick={() => onDelete(jobId)}>
+          Delete
         </MenuItem>
       </Menu>
     </Card>

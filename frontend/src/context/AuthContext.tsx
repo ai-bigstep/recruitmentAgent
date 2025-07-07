@@ -8,6 +8,8 @@ import React, {
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 // Define types
 interface User {
   id: string;
@@ -95,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await axios.post<{
         token: string;
         user: User;
-      }>('http://localhost:5000/api/auth/login', { email, password });
+      }>(`${baseURL}/api/auth/login`, { email, password });
 
       const { token, user } = response.data;
       localStorage.setItem('token', token);
@@ -112,7 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await axios.post<{
         token: string;
         user: User;
-      }>('http://localhost:5000/api/auth/register', userData);
+      }>(`${baseURL}/api/auth/register`, userData);
 
       const { token, user } = response.data;
       localStorage.setItem('token', token);

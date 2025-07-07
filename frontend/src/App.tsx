@@ -42,6 +42,7 @@ const App: React.FC = () => {
             <Route path="job/applicant/:jobId" element={<ApplicationDetail />} />
             <Route path="/editjob/:id" element={<EditJob />} />
             <Route path="/jobdetail/:id" element={<JobDetails />} />
+            <Route path="/register" element={<Register />} />
           </Route>
 
           
@@ -49,7 +50,7 @@ const App: React.FC = () => {
 
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 

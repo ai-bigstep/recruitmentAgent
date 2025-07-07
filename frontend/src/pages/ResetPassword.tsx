@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Snackbar, Alert } from '@mui/material';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ const ResetPassword = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:5000/api/auth/reset-password', {
+      const res = await axios.post(`${baseURL}/api/auth/reset-password`, {
         token,
         password,
       });

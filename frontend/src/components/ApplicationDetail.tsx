@@ -22,6 +22,8 @@ import {
 import { useParams } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 interface Candidate {
   id: string;
   name: string;
@@ -48,15 +50,17 @@ const ApplicationDetail: React.FC = () => {
 
   const { jobId } = useParams();
   const job_id = jobId;
+
   React.useEffect(() => {
     if (!jobId) return;
-    fetch(`http://localhost:5000/api/applicant/job/${job_id}`)
+    fetch(`${baseURL}/api/applicant/job/${job_id}`)
       .then(res => res.json())
       .then(data => setRows(data))
       .catch(err => {
         console.error('Failed to fetch applicants:', err);
         setRows([]);
       });
+      
   }, [jobId]);
 
   const handleCallClick = (id: string) => {
@@ -66,7 +70,7 @@ const ApplicationDetail: React.FC = () => {
 
   const handleShortlistToggle = async (id: string, isAccepted: boolean) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+      const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_accepted: isAccepted }),
@@ -87,7 +91,7 @@ const ApplicationDetail: React.FC = () => {
   const handleRatingChange = async (id: string, newRating: number | null) => {
     if (newRating !== null) {
       try {
-        const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+        const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ rating: newRating }),
@@ -115,7 +119,7 @@ const ApplicationDetail: React.FC = () => {
     // Soft delete each selected applicant via backend
     try {
       await Promise.all(selectedIdArray.map(async (id) => {
-        const res = await fetch(`http://localhost:5000/api/applicant/delete/${id}`, {
+        const res = await fetch(`${baseURL}/api/applicant/delete/${id}`, {
           method: 'DELETE',
         });
         if (!res.ok) {
@@ -305,7 +309,7 @@ const ApplicationDetail: React.FC = () => {
                 // Bulk shortlist
                 try {
                   await Promise.all(selectedIdArray.map(async (id) => {
-                    const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+                    const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
                       method: 'PATCH',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ is_accepted: true }),
@@ -332,7 +336,7 @@ const ApplicationDetail: React.FC = () => {
                 // Bulk reject
                 try {
                   await Promise.all(selectedIdArray.map(async (id) => {
-                    const res = await fetch(`http://localhost:5000/api/applicant/update/${id}`, {
+                    const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
                       method: 'PATCH',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ is_accepted: false }),

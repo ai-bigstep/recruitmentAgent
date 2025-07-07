@@ -18,6 +18,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const CreateJob: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -52,7 +54,7 @@ const CreateJob: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/jobs/',
+        `${baseURL}/api/jobs/`,
         {
           title: jobTitle,
           description: jobDescription,
@@ -100,7 +102,7 @@ const CreateJob: React.FC = () => {
     const maxAttempts = 30;
     const token = localStorage.getItem('token');
     while (attempts < maxAttempts) {
-      const res = await fetch(`http://localhost:5000/api/jobs/${jobId}/jd-result`, {
+      const res = await fetch(`${baseURL}/api/jobs/${jobId}/jd-result`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -133,7 +135,7 @@ const CreateJob: React.FC = () => {
     console.log("Insite handleGeneratefromprompt")
     const token = localStorage.getItem('token');
     try {
-      await fetch(`http://localhost:5000/api/jobs/${currentJobId}/jd-generate`, {
+      await fetch(`${baseURL}/api/jobs/${currentJobId}/jd-generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

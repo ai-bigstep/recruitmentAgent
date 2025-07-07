@@ -10,8 +10,8 @@ import File from '../models/file.model';
 import Application from '../models/application.model';
 import { AuthRequest } from '../middleware/auth.middleware';
 
-const sqs = new SQSClient({ region: process.env.AWS_REGION || 'ap-south-1' });
-const QUEUE_URL = 'https://sqs.ap-south-1.amazonaws.com/474560118046/resumequeue';
+const sqs = new SQSClient({ region: process.env.AWS_REGION });
+const QUEUE_URL = process.env.SQS_QUEUE_URL;
 
 export const uploadResume = async (req: AuthRequest, res: Response) => {
   const { job_id } = req.params;
@@ -75,6 +75,7 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
         status: 'pending',
       });
     }
+    
 
     // Step 5: Send message to SQS
     const messageCommand = new SendMessageCommand({

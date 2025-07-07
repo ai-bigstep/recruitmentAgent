@@ -13,10 +13,13 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const fetchJob = async (id: string | undefined) => {
+  console.log("fewfegfer");
+  console.log(baseURL);
   const token = localStorage.getItem('token');
-  const res = await axios.get(`http://localhost:5000/api/jobs/${id}`, {
+  const res = await axios.get(`${baseURL}/api/jobs/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
