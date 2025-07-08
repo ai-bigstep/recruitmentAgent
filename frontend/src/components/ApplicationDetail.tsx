@@ -207,16 +207,20 @@ const ApplicationDetail: React.FC = () => {
       headerName: 'Call',
       width: 130,
       sortable: false,
-      renderCell: (params: GridRenderCellParams) => (
-        <Button
-          variant="contained"
-          size="small"
-          disabled={disabledCalls.has(params.row.id)}
-          onClick={() => handleCallClick(params.row.id)}
-        >
-          {disabledCalls.has(params.row.id) ? 'Called' : 'Call'}
-        </Button>
-      ),
+      renderCell: (params: GridRenderCellParams) => {
+        const callStatus = params.row.call_status;
+        const isDisabled = callStatus === 'in_progress';
+        return (
+          <Button
+            variant="contained"
+            size="small"
+            disabled={isDisabled}
+            onClick={() => handleCallClick(params.row.id)}
+          >
+            {isDisabled ? 'Calling...' : 'Call'}
+          </Button>
+        );
+      },
     },
     {
       field: 'call_status',

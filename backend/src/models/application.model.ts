@@ -19,7 +19,7 @@ interface CandidateAttributes {
   resume_url: string;
   rating?: number;
   call_scheduled?: Date;
-  call_status?: string;
+  call_status?: 'in_progress' | 'failed' | 'completed';
   call_analysis?: string;
   is_accepted?: boolean;
   job_id: string;
@@ -51,7 +51,7 @@ class Application
   public resume_url!: string;
   public rating?: number;
   public call_scheduled?: Date;
-  public call_status?: string;
+  public call_status?: 'in_progress' | 'failed' | 'completed';
   public call_analysis?: string;
   public is_accepted?: boolean;
   public job_id!: string;
@@ -117,7 +117,7 @@ Application.init(
       allowNull: true,
     },
     call_status: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('in_progress', 'failed', 'completed'),
       allowNull: true,
     },
     call_analysis: {
