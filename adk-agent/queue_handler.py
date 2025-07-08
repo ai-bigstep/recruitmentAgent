@@ -11,13 +11,18 @@ QUEUE_URL = 'https://sqs.ap-south-1.amazonaws.com/474560118046/resumequeue'
 # API_ENDPOINT = os.getenv('API_ENDPOINT')  # e.g., http://localhost:8000/api/process-resume
 RESUME_API_ENDPOINT = 'http://127.0.0.1:8000/resume_extract'  # Default for local testing
 JD_API_ENDPOINT = 'http://127.0.0.1:8000/jd_gen'
+CALLING_API_ENDPOINT = 'http://127.0.0.1:8000/call'
 AWS_REGION = os.getenv('AWS_REGION', 'ap-south-1')
 
 # Initialize AWS SQS client
 sqs = boto3.client('sqs', region_name=AWS_REGION)
 
 def poll_sqs():
-    purge_queue()
+    try:
+        purge_queue()
+    except Exception as e:
+        print(e)
+
     while True:
         try:
             response = sqs.receive_message(
@@ -97,6 +102,39 @@ def poll_sqs():
                             ReceiptHandle=receipt_handle
                         )
                         print(f"🧹 Deleted jd_gen message for job {job_id}")
+                    except Exception as e:
+                        print(f"❗ Error deleting message: {e}")
+
+                elif msg_type == 'call':
+                    # Read message attributes
+                    job_id = attrs.get('job_id', {}).get('StringValue')
+                    application_id = attrs.get('application_id', {}).get('StringValue')
+                    if not job_id:
+                        print("⚠️  Missing job_id, skipping.")
+                        continue
+                    if not application_id:
+                        print("⚠️  Missing application_id, skipping.")
+                        continue
+                    print(f"📨 Received job_id={job_id}, application_id={application_id}")
+                    payload = {
+                        "job_id" : job_id,
+                        "application_id" : application_id
+                    }
+                    try:
+                        res = requests.post(CALLING_API_ENDPOINT, json=payload, timeout=600)
+                        res.raise_for_status()
+                        print(f"✅ Successfully processed calling applicant {application_id} for job {job_id}")
+                    except requests.RequestException as err:
+                        print(f"❌ Failed API call for applicant {application_id} for job {job_id}: {err}")
+                        continue  # Do not delete the message yet
+
+                    # Delete the message from the queue
+                    try:
+                        sqs.delete_message(
+                            QueueUrl=QUEUE_URL,
+                            ReceiptHandle=receipt_handle
+                        )
+                        print(f"🧹 Deleted message for job {job_id}, applicant {application_id}")
                     except Exception as e:
                         print(f"❗ Error deleting message: {e}")
 

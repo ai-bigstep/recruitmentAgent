@@ -27,7 +27,8 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
+  console.log("Email ", email);
+  console.log("Password ", password)
   const user = await User.findOne({ where: { email } });
   
   if (!user || !(await user.validPassword(password))) {

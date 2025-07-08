@@ -15,4 +15,7 @@ router.delete('/delete/:applicantId', catchAsync(softDeleteApplicant));
 
 router.patch('/update/:applicantId', catchAsync(updateApplicant));
 
+// New route to trigger a call (enqueue SQS request)
+router.post('/call/:jobId/:applicationId', catchAsync(require('../controllers/ApplicantList.controller').enqueueCallRequest));
+
 export default router;

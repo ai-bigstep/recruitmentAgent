@@ -13,6 +13,7 @@ from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams
 # from google.adk.guardrails.guardrail import Guardrail
 from ..prompts.resume_extractor_prompt import prompt_resume_extractor
 from ..prompts.jd_generator_prompt import prompt_jd_generator
+from ..prompts.calling_prompt import prompt_calling
 
 
 # Configure logging
@@ -68,6 +69,14 @@ async def get_agent_async(purpose: str = "resume_extractor", extras: dict = {}):
     elif purpose == "jd_generator":
         logger.info("Creating agent for jd generation")
         instruction = prompt_jd_generator
+
+    elif purpose == "calling_for_screening":
+        logger.info("Creating agent for calling/screening questions")
+        instruction = prompt_calling.replace(
+            "{{screening_questions}}", extras.get("screening_questions_prompt", "")
+        ).replace(
+            "{{job_description}}", extras.get("job_description", "")
+        )
     # guardrail = godrej_guardrail if company == "godrej" else tata_guardrail
     root_agent = LlmAgent(
         model="gemini-2.0-flash-exp",

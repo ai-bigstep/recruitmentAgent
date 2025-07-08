@@ -47,6 +47,8 @@ const Login = () => {
     }
 
     setLoading(true);
+    console.log(formData.email);
+    console.log(formData.password);
     const success = await login(formData.email, formData.password);
 
     if (success) {

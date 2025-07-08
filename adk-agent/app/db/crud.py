@@ -10,6 +10,8 @@ def get_job_data(job_id):
     result = session.execute(select(jobs).where(jobs.c.id == job_id)).fetchone()
     return dict(result._mapping) if result else None
 
+
+
 def update_application(application_id, data):
     stmt = update(applications).where(applications.c.id == application_id).values(
         name=data.get("name"), email=data.get("email"),
@@ -31,3 +33,13 @@ def get_pending_applications_by_job_id(job_id):
         )
     ).fetchall()
     return [dict(row._mapping) for row in results]
+
+def get_application_data(application_id):
+    result = session.execute(select(applications).where(applications.c.id == application_id)).fetchone()
+    return dict(result._mapping) if result else None
+
+
+def update_calling_status(application_id, call_status):
+    stmt = update(applications).where(applications.c.id == application_id).values(call_status=call_status)
+    session.execute(stmt)
+    session.commit()

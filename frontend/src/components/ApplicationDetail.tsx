@@ -63,30 +63,24 @@ const ApplicationDetail: React.FC = () => {
       
   }, [jobId]);
 
-  const handleCallClick = (id: string) => {
+  const handleCallClick = async (id: string) => {
     setDisabledCalls((prev) => new Set(prev).add(id));
     console.log(`Calling candidate ID ${id}...`);
-  };
-
-  const handleShortlistToggle = async (id: string, isAccepted: boolean) => {
+    if (!jobId) return;
     try {
-      const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_accepted: isAccepted }),
+      const res = await fetch(`${baseURL}/api/applicant/call/${jobId}/${id}`, {
+        method: 'POST',
       });
-      if (!res.ok) throw new Error('Failed to update applicant');
-      setRows((prev) =>
-        prev.map((row) =>
-          row.id === id ? { ...row, is_accepted: isAccepted } : row
-        )
-      );
-      setShortlistDisabled((prev) => new Set(prev).add(id));
+      if (!res.ok) throw new Error('Failed to enqueue call request');
+      // Optionally show a success message or update UI
+      console.log('Call request enqueued successfully');
     } catch (err) {
-      alert('Failed to update applicant.');
+      alert('Failed to enqueue call request.');
       console.error(err);
     }
   };
+
+  
 
   const handleRatingChange = async (id: string, newRating: number | null) => {
     if (newRating !== null) {
