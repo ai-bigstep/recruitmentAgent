@@ -12,6 +12,7 @@ from app.api.calling_globals import (
     global_job_description,
     global_job_title,
     global_screening_questions_prompt,
+    global_applicant_name,
     client,
 )
 
@@ -29,7 +30,7 @@ class RunRequest(BaseModel):
 
 @call_router.post("/call")
 async def initiate_call(request: RunRequest = Body(...)):
-    global global_job_description, global_screening_questions_prompt, global_job_title
+    global global_job_description, global_screening_questions_prompt, global_job_title, global_applicant_name
 
     job_data = get_job_data(request.job_id)
     if not job_data:
@@ -42,6 +43,8 @@ async def initiate_call(request: RunRequest = Body(...)):
     application_data = get_application_data(request.application_id)
     if not application_data:
         return HTTPException(status_code=404, detail="Applicant not found")
+    global_applicant_name = application_data['name']
+
     to_number = application_data['phone']
     print("Calling number: ", to_number)
     if not to_number.startswith("+91"):
