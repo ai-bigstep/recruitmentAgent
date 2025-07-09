@@ -19,6 +19,8 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Job {
   title: string;
@@ -54,6 +56,8 @@ const EditJob: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordInput, setKeywordInput] = useState('');
+  const [locationChips, setLocationChips] = useState<string[]>([]);
+  const [locationInput, setLocationInput] = useState('');
 
   const navigate = useNavigate();
 
@@ -77,7 +81,12 @@ const EditJob: React.FC = () => {
       setScreeningPrompt(job.screening_questions_prompt || '');
       setATSPrompt(job.ats_calculation_prompt || '');
       setType(job.type || 'Full Time');
-      setLocation(job.location || '');
+      // Initialize location chips from job.location
+      if (job.location) {
+        setLocationChips(job.location.split(',').map(l => l.trim()).filter(Boolean));
+      } else {
+        setLocationChips([]);
+      }
       // Initialize keywords from ats_calculation_prompt
       if (job.ats_calculation_prompt) {
         setKeywords(job.ats_calculation_prompt.split(',').map(k => k.trim()).filter(Boolean));
@@ -99,7 +108,7 @@ const EditJob: React.FC = () => {
           screening_questions_prompt: screeningPrompt,
           ats_calculation_prompt: keywords.join(', '), // use keywords
           type,
-          location,
+          location: locationChips.join(', '),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -186,6 +195,36 @@ const EditJob: React.FC = () => {
     setKeywords(keywords.filter((k) => k !== toDelete));
   };
 
+  const handleLocationAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Enter' || e.key === ',') && locationInput.trim()) {
+      e.preventDefault();
+      if (!locationChips.includes(locationInput.trim())) {
+        setLocationChips([...locationChips, locationInput.trim()]);
+      }
+      setLocationInput('');
+    }
+  };
+  const handleLocationDelete = (toDelete: string) => {
+    setLocationChips(locationChips.filter((l) => l !== toDelete));
+  };
+
+  const quillModules = {
+    toolbar: [
+      [{ 'font': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub' }, { 'script': 'super' }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'indent': '-1' }, { 'indent': '+1' }],
+      [{ 'align': [] }],
+      ['blockquote', 'code-block'],
+      ['link'],
+      ['clean']
+    ]
+  };
+
   if (fetching) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -230,15 +269,13 @@ const EditJob: React.FC = () => {
           />
 
           <Stack spacing={1}>
-            <TextField
-              label="Job Description"
-              value={isGenerating ? 'Typing...' : jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              multiline
-              rows={6}
-              fullWidth
-              required
-              inputProps={{ style: { overflow: 'auto' } }}
+            <ReactQuill
+              value={isGenerating ? '<p>Typing...</p>' : jobDescription}
+              onChange={setJobDescription}
+              theme="snow"
+              style={{ minHeight: 180, marginBottom: 8 }}
+              placeholder="Enter job description or generate with AI"
+              modules={quillModules}
             />
             <Box textAlign="right">
               <Button variant="outlined" size="small" onClick={handleAIGenerate}>
@@ -311,6 +348,29 @@ const EditJob: React.FC = () => {
             </Box>
           </Stack>
 
+          {/* Location as chip input */}
+          <Stack spacing={1}>
+            <TextField
+              label="Location(s)"
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
+              onKeyDown={handleLocationAdd}
+              placeholder="Type a location and press Enter"
+              fullWidth
+            />
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {locationChips.map((loc) => (
+                <Chip
+                  key={loc}
+                  label={loc}
+                  onDelete={() => handleLocationDelete(loc)}
+                  color="secondary"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          </Stack>
+
           <TextField
             select
             label="Type"
@@ -322,14 +382,6 @@ const EditJob: React.FC = () => {
             <MenuItem value="Full Time">Full Time</MenuItem>
             <MenuItem value="Freelance">Freelance</MenuItem>
           </TextField>
-
-          <TextField
-            label="Location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            fullWidth
-            required
-          />
 
           <Button
             type="submit"

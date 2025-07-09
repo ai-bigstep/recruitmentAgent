@@ -2,4 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure Quill editor is always visible */
+.ql-container {
+  min-height: unset !important;
+  height: 180px !important;
+  max-height: 180px !important;
+  overflow-y: auto !important;
+}
+
 

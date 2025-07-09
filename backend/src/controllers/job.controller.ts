@@ -16,7 +16,7 @@ export const createJob = async (req: AuthRequest, res: Response) => {
   const { title, description, screening_questions_prompt, ats_calculation_prompt, type, location } = req.body;
   const user_id = req.user?.id;
   if (!user_id) throw new AppError('Unauthorized: Missing user ID', 401);
-  console.log(ats_calculation_prompt);
+  
 
   const job = await Job.create({
     title,

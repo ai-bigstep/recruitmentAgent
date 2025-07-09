@@ -45,14 +45,14 @@ export default function DashboardLayoutBranding() {
   };
 
   const navigation: Navigation = [
-    { kind: 'header', title: 'Main' },
+    { kind: 'header' as const, title: 'Main' },
      {
        segment: '',
        title: 'Home',
        icon: <DashboardIcon />,
      },
-    { kind: 'divider' },
-    { kind: 'header', title: 'Jobs' },
+    { kind: 'divider' as const },
+    { kind: 'header' as const, title: 'Jobs' },
     {
       segment: 'alljobs',
       title: 'All Jobs',
@@ -65,21 +65,31 @@ export default function DashboardLayoutBranding() {
     },
     // Add Create Recruiter option for superadmin
     ...(user?.role === 'superadmin' ? [
-      { kind: 'divider' },
-      { kind: 'header', title: 'Admin' },
+      { kind: 'divider' as const },
+      { kind: 'header' as const, title: 'Admin' },
       {
         segment: 'create-recruiter',
         title: 'Create Recruiter',
         icon: <PersonAddIcon />,
       },
     ] : []),
+    { kind: 'divider' as const },
+    {
+      segment: 'logout',
+      title: 'Logout',
+      icon: <LogOut className="w-5 h-5" />,
+    },
   ];
-
-  // Get the current path segment (e.g., 'alljobs', 'createjob', etc.)
-  const currentSegment = location.pathname.split('/')[1] || '';
 
   const updatedNavigation = navigation.map((item) => {
     if (item.kind || !item.segment) return item;
+    if (item.segment === 'logout') {
+      return {
+        ...item,
+        onClick: handleLogout,
+        selected: false,
+      };
+    }
     return {
       ...item,
       onClick: () => navigate(`/${item.segment}`),
@@ -125,29 +135,6 @@ export default function DashboardLayoutBranding() {
       theme={demoTheme}
     >
       <DashboardLayout>
-        {/* Sidebar Logout Button for all users, styled like navigation items */}
-        <Box
-          sx={{
-            position: 'fixed',
-            left: 0,
-            bottom: 0,
-            width: 240,
-            p: 2,
-            zIndex: 1201,
-            background: 'inherit',
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <ListItem disablePadding sx={{ width: '100%' }}>
-            <ListItemButton onClick={handleLogout}>
-              <ListItemIcon>
-                <LogOut className="w-5 h-5" />
-              </ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItemButton>
-          </ListItem>
-        </Box>
         <Box sx={{ p: 3 }}>
           <Outlet />
         </Box>
