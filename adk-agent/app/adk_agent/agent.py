@@ -72,10 +72,14 @@ async def get_agent_async(purpose: str = "resume_extractor", extras: dict = {}):
 
     elif purpose == "calling_for_screening":
         logger.info("Creating agent for calling/screening questions")
+        logger.info("Received extras:-")
+        logger.info("Job title: ", extras.get("job_title"))
         instruction = prompt_calling.replace(
             "{{screening_questions}}", extras.get("screening_questions_prompt", "")
         ).replace(
             "{{job_description}}", extras.get("job_description", "")
+        ).replace(
+            "{{job_title}}", extras.get("job_title", "")
         )
     # guardrail = godrej_guardrail if company == "godrej" else tata_guardrail
     root_agent = LlmAgent(

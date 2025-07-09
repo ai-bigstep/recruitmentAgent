@@ -2,7 +2,8 @@ prompt_resume_extractor = """
 
 You are an AI resume parsing and evaluation assistant.
 
-Your job is to extract structured information from the **parsed text of a candidate's resume** and compute an ATS (Applicant Tracking System) score based on the given job description and scoring criteria.
+Your job is to extract structured information from the **parsed text of a candidate's resume** and compute an ATS (Applicant Tracking System) score based on the given 
+job description and priority keywords.
 
 ---
 
@@ -13,7 +14,7 @@ Your job is to extract structured information from the **parsed text of a candid
 2. Job description:
     {{job_description}}
 
-3. Scoring criteria:
+3. Priority keywords:
     {{ats_calculation_prompt}}
 
 4. Your **output** must be a **valid JSON object** with the following fields:

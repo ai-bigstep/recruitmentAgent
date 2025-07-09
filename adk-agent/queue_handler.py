@@ -3,6 +3,7 @@ import time
 import boto3
 import requests
 from dotenv import load_dotenv
+from app.services.calling_utils import get_call_status
 
 # Load environment variables from .env
 load_dotenv()
@@ -16,8 +17,11 @@ AWS_REGION = os.getenv('AWS_REGION', 'ap-south-1')
 
 # Initialize AWS SQS client
 sqs = boto3.client('sqs', region_name=AWS_REGION)
+print("hi")
+global_last_call_sid = ""
 
 def poll_sqs():
+    global global_last_call_sid
     try:
         purge_queue()
     except Exception as e:
@@ -106,6 +110,13 @@ def poll_sqs():
                         print(f"❗ Error deleting message: {e}")
 
                 elif msg_type == 'call':
+
+                    # check last call's status
+                    last_call_status = get_call_status(global_last_call_sid)
+                    if last_call_status=="in-progress":
+                        print("Last call still in progress")
+                        continue
+
                     # Read message attributes
                     job_id = attrs.get('job_id', {}).get('StringValue')
                     application_id = attrs.get('application_id', {}).get('StringValue')
@@ -123,6 +134,10 @@ def poll_sqs():
                     try:
                         res = requests.post(CALLING_API_ENDPOINT, json=payload, timeout=600)
                         res.raise_for_status()
+                        res_json = res.json()                        
+                        print("Call succesfully initiated to ", res_json.get("status"))
+                        print("Call sid: ", res_json.get("call_sid"))
+                        global_last_call_sid = res_json.get("call_sid")
                         print(f"✅ Successfully processed calling applicant {application_id} for job {job_id}")
                     except requests.RequestException as err:
                         print(f"❌ Failed API call for applicant {application_id} for job {job_id}: {err}")
