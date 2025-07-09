@@ -320,9 +320,10 @@ const EditJob: React.FC = () => {
             label="Screening Questions"
             value={screeningPrompt}
             onChange={(e) => setScreeningPrompt(e.target.value)}
-            fullWidth
             multiline
-            minRows={2}
+            rows={4}
+            fullWidth
+            inputProps={{ style: { overflow: 'auto' } }}
             required
           />
 
