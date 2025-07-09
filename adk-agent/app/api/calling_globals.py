@@ -13,3 +13,4 @@ client = Client(account_sid, auth_token)
 global_job_description = ""
 global_job_title = ""
 global_screening_questions_prompt = ""
+global_applicant_name = ""
