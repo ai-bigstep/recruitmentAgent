@@ -339,7 +339,7 @@ const ApplicationDetail: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', p: 0, m: 0 }}>
+    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', p: 0, m: 0 }}>
       <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2, m: 0, height: '100%', width: '100%' }}>
         <Typography variant="h6" gutterBottom sx={{ width: '100%', minWidth: '400px' }}>
           Applications for Job ID: {jobId ? jobId.slice(-4).toUpperCase() : jobId}
@@ -431,7 +431,7 @@ const ApplicationDetail: React.FC = () => {
           )}
         </Box>
 
-        <Box sx={{ flex: 1, minHeight: 0 }}>
+        <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
           <DataGrid
             rows={filteredRows}
             columns={columns}
