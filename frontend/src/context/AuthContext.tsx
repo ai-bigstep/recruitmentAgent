@@ -68,6 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: decoded.id,
             email: decoded.email,
             role: decoded.role,
+            name: decoded.name,
           });
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         }

@@ -36,3 +36,12 @@ export const authenticateToken = (
     next();
   });
 };
+
+export function requireRole(role: string) {
+  return (req: any, res: any, next: any) => {
+    if (req.user && req.user.role === role) {
+      return next();
+    }
+    return res.status(403).json({ message: 'Forbidden: Insufficient role' });
+  };
+}

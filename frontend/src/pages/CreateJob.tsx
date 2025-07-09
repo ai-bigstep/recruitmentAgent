@@ -12,6 +12,7 @@ import {
   InputAdornment,
   Snackbar,
   Slide,
+  Chip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
@@ -25,6 +26,8 @@ const CreateJob: React.FC = () => {
   const [jobDescription, setJobDescription] = useState('');
   const [screeningPrompt, setScreeningPrompt] = useState('');
   const [atsPrompt, setATSPrompt] = useState('');
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState('');
   const [type, setType] = useState('');
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,6 +48,19 @@ const CreateJob: React.FC = () => {
     loadInitialData();
   }, []);
 
+  const handleKeywordAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Enter' || e.key === ',') && keywordInput.trim()) {
+      e.preventDefault();
+      if (!keywords.includes(keywordInput.trim())) {
+        setKeywords([...keywords, keywordInput.trim()]);
+      }
+      setKeywordInput('');
+    }
+  };
+  const handleKeywordDelete = (toDelete: string) => {
+    setKeywords(keywords.filter((k) => k !== toDelete));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -59,7 +75,7 @@ const CreateJob: React.FC = () => {
           title: jobTitle,
           description: jobDescription,
           screening_questions_prompt: screeningPrompt,
-          ats_calculation_prompt: atsPrompt,
+          ats_calculation_prompt: keywords.join(', '), // use keywords
           type,
           location,
         },
@@ -81,6 +97,7 @@ const CreateJob: React.FC = () => {
       setLocation('');
       setAIPrompt('');
       setShowAIPrompt(false);
+      setKeywords([]); // Clear keywords after submission
 
       setTimeout(() => {
         navigate('/alljobs');
@@ -250,15 +267,28 @@ const CreateJob: React.FC = () => {
             inputProps={{ style: { overflow: 'auto' } }}
           />
 
-          <TextField
-            label="ATS Calculation Prompt"
-            value={atsPrompt}
-            onChange={(e) => setATSPrompt(e.target.value)}
-            multiline
-            rows={4}
-            fullWidth
-            inputProps={{ style: { overflow: 'auto' } }}
-          />
+          {/* Replace ATS Calculation Prompt textarea with keyword chip input */}
+          <Stack spacing={1}>
+            <TextField
+              label="Keywords (for ATS Calculation)"
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={handleKeywordAdd}
+              placeholder="Type a keyword for ATS Calculation and press Enter"
+              fullWidth
+            />
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {keywords.map((keyword) => (
+                <Chip
+                  key={keyword}
+                  label={keyword}
+                  onDelete={() => handleKeywordDelete(keyword)}
+                  color="primary"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          </Stack>
 
           <TextField
             label="Type"

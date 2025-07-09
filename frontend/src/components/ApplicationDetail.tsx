@@ -4,6 +4,7 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridRowSelectionModel,
+  GridToolbar,
 } from '@mui/x-data-grid';
 import {
   Button,
@@ -40,28 +41,38 @@ interface Candidate {
 
 const ApplicationDetail: React.FC = () => {
   const [rows, setRows] = React.useState<Candidate[]>([]);
+  const [totalCount, setTotalCount] = React.useState(0);
+  const [page, setPage] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
   const [ratedCandidates, setRatedCandidates] = React.useState<Set<string>>(new Set());
   const [shortlistDisabled, setShortlistDisabled] = React.useState<Set<string>>(new Set());
   const [disabledCalls, setDisabledCalls] = React.useState<Set<string>>(new Set());
   const [atsFilter, setAtsFilter] = React.useState<number | null>(null);
   const [ratingFilter, setRatingFilter] = React.useState<number | null>(null);
   const [rowSelectionModel, setRowSelectionModel] =
-  React.useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
+    React.useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
 
   const { jobId } = useParams();
   const job_id = jobId;
 
   React.useEffect(() => {
     if (!jobId) return;
-    fetch(`${baseURL}/api/applicant/job/${job_id}`)
+    const params = new URLSearchParams({
+      page: (page + 1).toString(),
+      pageSize: pageSize.toString(),
+    });
+    fetch(`${baseURL}/api/applicant/job/${job_id}?${params}`)
       .then(res => res.json())
-      .then(data => setRows(data))
+      .then(data => {
+        console.log(data);
+        setRows(data.rows || data);
+        setTotalCount(data.count || data.length || 0);
+      })
       .catch(err => {
         console.error('Failed to fetch applicants:', err);
         setRows([]);
       });
-      
-  }, [jobId]);
+  }, [jobId, page, pageSize]);
 
   const handleCallClick = async (id: string) => {
     setDisabledCalls((prev) => new Set(prev).add(id));
@@ -160,7 +171,7 @@ const ApplicationDetail: React.FC = () => {
       headerName: 'AI Status',
       width: 120,
       renderCell: (params: GridRenderCellParams) => (
-        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+        <Typography variant="body2"  sx={{ fontWeight: 600, mt: 2 }}>
           {params.row.status}
         </Typography>
       ),
@@ -267,118 +278,129 @@ const ApplicationDetail: React.FC = () => {
   ];
 
   return (
-    <Paper sx={{ p: 2, height: '100%', width: '100%' }}>
-      <Typography variant="h6" gutterBottom>
-        Applications for Job ID: {jobId}
-      </Typography>
+    <Box sx={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', p: 0, m: 0 }}>
+      <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2, m: 0, height: '100%', width: '100%' }}>
+        <Typography variant="h6" gutterBottom sx={{ width: '100%', minWidth: '400px' }}>
+          Applications for Job ID: {jobId ? jobId.slice(-4).toUpperCase() : jobId}
+        </Typography>
 
-      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          label="Min ATS Score"
-          type="number"
-          size="small"
-          value={atsFilter ?? ''}
-          onChange={(e) => setAtsFilter(e.target.value ? parseInt(e.target.value) : null)}
-        />
-        <TextField
-          label="Min HR Rating"
-          type="number"
-          size="small"
-          inputProps={{ min: 0, max: 5, step: 0.5 }}
-          value={ratingFilter ?? ''}
-          onChange={(e) => setRatingFilter(e.target.value ? parseFloat(e.target.value) : null)}
-        />
-        <Button variant="outlined" onClick={() => {
-          setAtsFilter(null);
-          setRatingFilter(null);
-        }}>
-          Clear Filters
-        </Button>
-        {selectedIdArray.length > 0 && (
-          <>
-            <IconButton aria-label="delete" color="error" onClick={handleDeleteSelected}>
-              <DeleteIcon />
-            </IconButton>
-            <Button
-              variant="contained"
-              color="success"
-              size="small"
-              onClick={async () => {
-                // Bulk shortlist
-                try {
-                  await Promise.all(selectedIdArray.map(async (id) => {
-                    const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ is_accepted: true }),
-                    });
-                    if (!res.ok) throw new Error(`Failed to shortlist applicant with id ${id}`);
-                  }));
-                  setRows((prev) => prev.map((row) =>
-                    selectedIdArray.includes(row.id) ? { ...row, is_accepted: true } : row
-                  ));
-                } catch (err) {
-                  alert('Failed to shortlist one or more applicants.');
-                  console.error(err);
-                }
-              }}
-              sx={{ ml: 1 }}
-            >
-              Shortlist
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              size="small"
-              onClick={async () => {
-                // Bulk reject
-                try {
-                  await Promise.all(selectedIdArray.map(async (id) => {
-                    const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ is_accepted: false }),
-                    });
-                    if (!res.ok) throw new Error(`Failed to reject applicant with id ${id}`);
-                  }));
-                  setRows((prev) => prev.map((row) =>
-                    selectedIdArray.includes(row.id) ? { ...row, is_accepted: false } : row
-                  ));
-                } catch (err) {
-                  alert('Failed to reject one or more applicants.');
-                  console.error(err);
-                }
-              }}
-              sx={{ ml: 1 }}
-            >
-              Reject
-            </Button>
-          </>
-        )}
-      </Box>
+        <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            label="Min ATS Score"
+            type="number"
+            size="small"
+            value={atsFilter ?? ''}
+            onChange={(e) => setAtsFilter(e.target.value ? parseInt(e.target.value) : null)}
+          />
+          <TextField
+            label="Min HR Rating"
+            type="number"
+            size="small"
+            inputProps={{ min: 0, max: 5, step: 0.5 }}
+            value={ratingFilter ?? ''}
+            onChange={(e) => setRatingFilter(e.target.value ? parseFloat(e.target.value) : null)}
+            sx={{ minWidth: '200px' }}
+          />
+          <Button variant="outlined" onClick={() => {
+            setAtsFilter(null);
+            setRatingFilter(null);
+          }}>
+            Clear Filters
+          </Button>
+          {selectedIdArray.length > 0 && (
+            <>
+              <IconButton aria-label="delete" color="error" onClick={handleDeleteSelected}>
+                <DeleteIcon />
+              </IconButton>
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                onClick={async () => {
+                  // Bulk shortlist
+                  try {
+                    await Promise.all(selectedIdArray.map(async (id) => {
+                      const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ is_accepted: true }),
+                      });
+                      if (!res.ok) throw new Error(`Failed to shortlist applicant with id ${id}`);
+                    }));
+                    setRows((prev) => prev.map((row) =>
+                      selectedIdArray.includes(row.id) ? { ...row, is_accepted: true } : row
+                    ));
+                  } catch (err) {
+                    alert('Failed to shortlist one or more applicants.');
+                    console.error(err);
+                  }
+                }}
+                sx={{ ml: 1 }}
+              >
+                Shortlist
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                size="small"
+                onClick={async () => {
+                  // Bulk reject
+                  try {
+                    await Promise.all(selectedIdArray.map(async (id) => {
+                      const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ is_accepted: false }),
+                      });
+                      if (!res.ok) throw new Error(`Failed to reject applicant with id ${id}`);
+                    }));
+                    setRows((prev) => prev.map((row) =>
+                      selectedIdArray.includes(row.id) ? { ...row, is_accepted: false } : row
+                    ));
+                  } catch (err) {
+                    alert('Failed to reject one or more applicants.');
+                    console.error(err);
+                  }
+                }}
+                sx={{ ml: 1 }}
+              >
+                Reject
+              </Button>
+            </>
+          )}
+        </Box>
 
-      <DataGrid
-        rows={filteredRows}
-        columns={columns}
-        pageSizeOptions={[5, 10]}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
-          },
-        }}
-        checkboxSelection
-        disableRowSelectionOnClick
-       
-        // onRowSelectionModelChange={(ids) => setSelectedIds(ids as unknown as string[])}
-
-        onRowSelectionModelChange={(newRowSelectionModel) => {
-          console.log(newRowSelectionModel);
-          setRowSelectionModel(newRowSelectionModel);
-        }}
-        rowSelectionModel={rowSelectionModel}
-        sx={{ border: 0, height: 500 }}
-      />
-    </Paper>
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            pageSizeOptions={[5,10]}
+            components={{ Toolbar: GridToolbar }}
+            pagination
+            paginationMode="server"
+            rowCount={totalCount}
+            paginationModel={{ page, pageSize }}
+            onPaginationModelChange={({ page, pageSize }) => {
+              setPage(page);
+              setPageSize(pageSize);
+            }}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 5 },
+              },
+            }}
+            checkboxSelection
+            disableRowSelectionOnClick
+            onRowSelectionModelChange={(newRowSelectionModel) => {
+              console.log(newRowSelectionModel);
+              setRowSelectionModel(newRowSelectionModel);
+            }}
+            rowSelectionModel={rowSelectionModel}
+            sx={{ border: 0, height: '100%', width: '100%' }}
+          />
+        </Box>
+      </Paper>
+    </Box>
   );
 };
 

@@ -1,7 +1,8 @@
 // App.tsx
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -21,9 +22,10 @@ import ResetPassword from './pages/ResetPassword';
 
 
 const App: React.FC = () => {
+  const { user, loading } = useAuth();
 
   return (
-    <AuthProvider>
+    
       <BrowserRouter>
         <Routes>
           {/* Private Routes under Dashboard */}
@@ -42,7 +44,10 @@ const App: React.FC = () => {
             <Route path="job/applicant/:jobId" element={<ApplicationDetail />} />
             <Route path="/editjob/:id" element={<EditJob />} />
             <Route path="/jobdetail/:id" element={<JobDetails />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/create-recruiter" element={
+              loading ? <div>Loading...</div> :
+              user && user.role === 'superadmin' ? <Register /> : <Navigate to="/" />
+            } />
           </Route>
 
           
@@ -65,7 +70,7 @@ const App: React.FC = () => {
           />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+  
   );
 };
 

@@ -12,6 +12,7 @@ import {
   InputAdornment,
   Snackbar,
   Slide,
+  Chip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
@@ -51,6 +52,8 @@ const EditJob: React.FC = () => {
   const [aiPrompt, setAIPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState('');
 
   const navigate = useNavigate();
 
@@ -75,6 +78,10 @@ const EditJob: React.FC = () => {
       setATSPrompt(job.ats_calculation_prompt || '');
       setType(job.type || 'Full Time');
       setLocation(job.location || '');
+      // Initialize keywords from ats_calculation_prompt
+      if (job.ats_calculation_prompt) {
+        setKeywords(job.ats_calculation_prompt.split(',').map(k => k.trim()).filter(Boolean));
+      }
     }
   }, [job]);
 
@@ -90,7 +97,7 @@ const EditJob: React.FC = () => {
           title: jobTitle,
           description: jobDescription,
           screening_questions_prompt: screeningPrompt,
-          ats_calculation_prompt: atsPrompt,
+          ats_calculation_prompt: keywords.join(', '), // use keywords
           type,
           location,
         },
@@ -166,6 +173,19 @@ const EditJob: React.FC = () => {
     setIsGenerating(false);
   };
 
+  const handleKeywordAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Enter' || e.key === ',') && keywordInput.trim()) {
+      e.preventDefault();
+      if (!keywords.includes(keywordInput.trim())) {
+        setKeywords([...keywords, keywordInput.trim()]);
+      }
+      setKeywordInput('');
+    }
+  };
+  const handleKeywordDelete = (toDelete: string) => {
+    setKeywords(keywords.filter((k) => k !== toDelete));
+  };
+
   if (fetching) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -185,9 +205,9 @@ const EditJob: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="sm">
       <Typography variant="h5" fontWeight={600} textAlign="center" gutterBottom>
-        Bigstep HR Assistant - Edit Job
+        Edit Job
       </Typography>
 
       <Snackbar
@@ -260,22 +280,36 @@ const EditJob: React.FC = () => {
           )}
 
           <TextField
-            label="Screening Questions Prompt"
+            label="Screening Questions"
             value={screeningPrompt}
             onChange={(e) => setScreeningPrompt(e.target.value)}
             fullWidth
             multiline
             minRows={2}
+            required
           />
 
-          <TextField
-            label="ATS Calculation Prompt"
-            value={atsPrompt}
-            onChange={(e) => setATSPrompt(e.target.value)}
-            fullWidth
-            multiline
-            minRows={2}
-          />
+          <Stack spacing={1}>
+            <TextField
+              label="Keywords (for ATS Calculation)"
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={handleKeywordAdd}
+              placeholder="Type a keyword for ATS Calculation and press Enter"
+              fullWidth
+            />
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {keywords.map((keyword) => (
+                <Chip
+                  key={keyword}
+                  label={keyword}
+                  onDelete={() => handleKeywordDelete(keyword)}
+                  color="primary"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          </Stack>
 
           <TextField
             select
@@ -283,6 +317,7 @@ const EditJob: React.FC = () => {
             value={type}
             onChange={(e) => setType(e.target.value)}
             fullWidth
+            required
           >
             <MenuItem value="Full Time">Full Time</MenuItem>
             <MenuItem value="Freelance">Freelance</MenuItem>
@@ -293,6 +328,7 @@ const EditJob: React.FC = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             fullWidth
+            required
           />
 
           <Button

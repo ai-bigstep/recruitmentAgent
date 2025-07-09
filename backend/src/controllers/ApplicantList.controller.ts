@@ -10,14 +10,23 @@ const sqs = new AWS.SQS();
 
 export const getApplicantsByJob = async (req: Request, res: Response) => {
   const { jobId } = req.params;
+  
+  
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
+  
+  const offset = (page - 1) * pageSize;
 
   try {
-    const candidates = await Application.findAll({
+    const { rows, count } = await Application.findAndCountAll({
       where: { job_id: jobId, is_deleted: false },
       order: [['createdAt', 'DESC']],
+      offset,
+      limit: pageSize,
+      raw: true, // Only return plain objects
     });
-
-    return res.status(200).json(candidates);
+    
+    return res.status(200).json({ rows, count });
   } catch (error) {
     console.error('Error fetching candidates for job:', error);
     return res.status(500).json({ message: 'Failed to retrieve candidates for the job' });

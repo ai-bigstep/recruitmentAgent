@@ -94,34 +94,35 @@ const JobCard = ({ title, candidateCount, jobId, onDelete, recruiter }: JobCardP
       </Box>
 
       <CardContent>
-        {/* Title */}
-        <Typography
-          variant="body1"
-          align="center"
-          gutterBottom
-          sx={{
-            color: theme.palette.primary.main,
-            fontSize: '1.25rem',
-            fontWeight: 'bold',
-            mb: 2,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordBreak: 'break-word',
-            textAlign: 'center',
-            minHeight: '3rem',
-          }}
-        >
-          {title}
-        </Typography>
-
-        <Divider sx={{ mb: 3 }} />
+        {/* Title and Divider in fixed-height Box */}
+        <Box sx={{ height: '4rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{
+              color: theme.palette.primary.main,
+              fontSize: '1.25rem',
+              fontWeight: 'bold',
+              mb: 0,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              wordBreak: 'break-word',
+              textAlign: 'center',
+              minHeight: '3rem',
+              maxWidth: '100%',
+            }}
+          >
+            {title}
+          </Typography>
+          {/* <Divider /> */}
+        </Box>
 
         {/* Recruiter Info for Superadmin */}
         {recruiter && (
-          <Box display="flex" flexDirection="column" alignItems="center" gap={1} mb={2}>
+          <Box display="flex" flexDirection="column" alignItems="center" gap={1} mb={2} mt={1}>
             <Typography variant="caption" color="text.secondary" textAlign="center">
               Created by
             </Typography>
@@ -133,23 +134,51 @@ const JobCard = ({ title, candidateCount, jobId, onDelete, recruiter }: JobCardP
 
         {/* Candidate Avatar */}
         <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
-          <Avatar
-            sx={{
-              width: avatarSize,
-              height: avatarSize,
-              bgcolor: 'primary.light',
-              border: '2px solid',
-              borderColor: 'primary.main',
-              fontSize: 32,
-              fontWeight: 500,
-              color: 'primary.dark',
-            }}
-          >
-            {candidateCount}
-          </Avatar>
-          <Typography variant="body1" color="text.secondary">
-            Candidates
-          </Typography>
+          <Box sx={{ position: 'relative', width: avatarSize + 44, height: avatarSize + 36, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
+            <svg width={avatarSize + 44} height={avatarSize + 44}>
+              <circle
+                cx={(avatarSize + 44) / 2}
+                cy={(avatarSize + 36) / 2}
+                r={(avatarSize + 38) / 2 - 7}
+                stroke="#0074b8"
+                strokeWidth="7"
+                fill="white"
+              />
+              <path
+                d="M {(avatarSize + 24) / 2},6
+           a {(avatarSize + 24) / 2 - 6},{(avatarSize + 24) / 2 - 6} 0 0,1 30,0"
+                stroke="#ff4b6e"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
+              />
+            </svg>
+            <Box sx={{ position: 'absolute', top: -5, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <Typography
+                sx={{
+                  fontWeight: 400,
+                  fontSize: 35,
+                  color: '#466276',
+                  fontFamily: 'Montserrat, Arial, sans-serif',
+                  lineHeight: 1.1,
+                }}
+              >
+                {candidateCount}
+              </Typography>
+              <Typography
+                sx={{
+                  fontWeight: 400,
+                  fontSize: 18,
+                  color: '#466276',
+                  fontFamily: 'Montserrat, Arial, sans-serif',
+                  lineHeight: 1.1,
+                  mt: 0.5,
+                }}
+              >
+                Candidates
+              </Typography>
+            </Box>
+          </Box>
         </Box>
 
         {/* Action Buttons */}
