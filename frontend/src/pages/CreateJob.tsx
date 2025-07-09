@@ -215,7 +215,7 @@ const CreateJob: React.FC = () => {
   return (
     <Container maxWidth="md">
       <Typography variant="h5" fontWeight={600} textAlign="center" gutterBottom>
-        Bigstep HR Assistant - Create Job
+        Create Job
       </Typography>
 
       <Snackbar
