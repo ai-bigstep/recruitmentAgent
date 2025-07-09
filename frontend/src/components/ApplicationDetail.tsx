@@ -176,11 +176,35 @@ const ApplicationDetail: React.FC = () => {
       field: 'status',
       headerName: 'AI Status',
       width: 120,
-      renderCell: (params: GridRenderCellParams) => (
-        <Typography variant="body2"  sx={{ fontWeight: 600, mt: 2 }}>
-          {params.row.status}
-        </Typography>
-      ),
+      renderCell: (params: GridRenderCellParams) => {
+        const status = params.row.status;
+        if (typeof status === 'string') {
+          if (status.toLowerCase() === 'completed') {
+            return (
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, mt: 2, color: 'green' }}
+              >
+                Completed
+              </Typography>
+            );
+          } else if (status.toLowerCase() === 'pending') {
+            return (
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, mt: 2, color: 'text.secondary' }}
+              >
+                Pending
+              </Typography>
+            );
+          }
+        }
+        return (
+          <Typography variant="body2" sx={{ fontWeight: 600, mt: 2 }}>
+            {status}
+          </Typography>
+        );
+      },
     },
     {
       field: 'rating',
@@ -277,7 +301,15 @@ const ApplicationDetail: React.FC = () => {
             </Typography>
           );
         } else {
-          return null;
+          return (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontWeight: 600, mt: 2 }}
+            >
+              Pending
+            </Typography>
+          );
         }
       },
     },
@@ -381,7 +413,7 @@ const ApplicationDetail: React.FC = () => {
             rows={filteredRows}
             columns={columns}
             pageSizeOptions={[5,10]}
-            components={{ Toolbar: GridToolbar }}
+            slots={{ toolbar: GridToolbar }}
             pagination
             paginationMode="server"
             rowCount={totalCount}
