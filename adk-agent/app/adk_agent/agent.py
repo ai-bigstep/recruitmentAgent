@@ -73,8 +73,8 @@ async def get_agent_async(purpose: str = "resume_extractor", extras: dict = {}):
     elif purpose == "calling_for_screening":
         logger.info("Creating agent for calling/screening questions")
         logger.info("Received extras:-")
-        logger.info("Job title: ", extras.get("job_title"))
-        logger.info("Applicant name: ", extras.get("applicant_name"))
+        logger.info("Job title: %s", extras.get("job_title"))
+        logger.info("Applicant name: %s", extras.get("applicant_name"))
         instruction = prompt_calling.replace(
             "{{screening_questions}}", extras.get("screening_questions_prompt", "")
         ).replace(

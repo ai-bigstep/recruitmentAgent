@@ -5,8 +5,11 @@ from app.api.calling_globals import (
 )
 import os
 
+global_application_id = ""
 
-async def initiate_call_to_number(to_number: str):
+async def initiate_call_to_number(to_number: str, application_id: str):
+    global global_application_id
+    global_application_id = application_id
     from_number = os.getenv("TWILIO_PHONE_NUMBER")
     base_url = os.getenv("BASE_URL", "http://localhost:8000")
     if base_url == "http://localhost:8000":
@@ -20,10 +23,15 @@ async def initiate_call_to_number(to_number: str):
     return {"call_sid": call_sid, "status": "initiated"}
 
 def create_call(to_number, from_number, twiml_url):
+    import os
+    base_url = os.getenv("BASE_URL", "http://localhost:8000")
+    status_callback_url = f"{base_url}/call/status_callback"
     call = client.calls.create(
         to=to_number,
         from_=from_number,
-        url=twiml_url
+        url=twiml_url,
+        status_callback=status_callback_url,
+        status_callback_event=["initiated", "ringing", "answered", "completed"]
     )
     print("call sid",call.sid)
     return call.sid
@@ -34,6 +42,7 @@ def get_call_status(call_sid):
 
 
 async def handle_twiml_service(request: Request):
+    global global_application_id
     form_data = await request.form()
     call_sid = form_data.get("CallSid")
 
@@ -50,7 +59,7 @@ async def handle_twiml_service(request: Request):
     # audio_file_name = os.environ.get('INITIAL_GREETING_AUDIO_FILE', 'initial_audio.mp3')
     # audio_file_url = f"{effective_base_url}/static/initial_audio.mp3"
 
-    websocket_url_for_twilio = f"{ws_scheme}://{host}/wscall/{call_sid}"
+    websocket_url_for_twilio = f"{ws_scheme}://{host}/wscall/{call_sid}/{global_application_id}"
     print(f"WebSocket URL for Twilio: {websocket_url_for_twilio}")
     
     twiml = generate_twiml(websocket_url_for_twilio)

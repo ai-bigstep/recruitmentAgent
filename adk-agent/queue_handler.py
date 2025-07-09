@@ -116,6 +116,7 @@ def poll_sqs():
                     if last_call_status=="in-progress":
                         print("Last call still in progress")
                         continue
+                    
 
                     # Read message attributes
                     job_id = attrs.get('job_id', {}).get('StringValue')

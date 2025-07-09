@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, or_, and_, text, func
 from app.db.models import session, resume_files, jobs, applications
 
 
@@ -41,5 +41,16 @@ def get_application_data(application_id):
 
 def update_calling_status(application_id, call_status):
     stmt = update(applications).where(applications.c.id == application_id).values(call_status=call_status)
+    session.execute(stmt)
+    session.commit()
+
+
+def get_application_by_phone(phone):
+    result = session.execute(select(applications).where(applications.c.phone == phone)).fetchone()
+    return dict(result._mapping) if result else None
+
+
+def update_application_call_status_by_phone(phone, call_status):
+    stmt = update(applications).where(applications.c.phone.like(f"%{phone}%")).values(call_status=call_status)
     session.execute(stmt)
     session.commit()

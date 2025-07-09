@@ -8,19 +8,24 @@ from google.adk.agents.live_request_queue import LiveRequestQueue
 from google.adk.agents.run_config import RunConfig
 from google.genai.types import SpeechConfig, VoiceConfig, PrebuiltVoiceConfig, Content, Part, Blob
 from google.adk.agents.run_config import StreamingMode
-from app.api.calling_globals import global_job_description, global_job_title, global_screening_questions_prompt, client, global_applicant_name
+from app.api.calling_globals import client
+from app.db.crud import get_application_data, get_job_data
 
 
-async def start_agent_session(session_id, is_audio=False):
-    global global_job_description, global_screening_questions_prompt, global_job_title, global_applicant_name
+async def start_agent_session(session_id, application_id, is_audio=False):
+    application_data = get_application_data(application_id)
+    job_id = application_data['job_id']
+    job_data = get_job_data(job_id)
+
+
     """Starts an agent session"""
     root_agent = await get_agent_async(
             purpose="calling_for_screening", 
             extras={
-                "screening_questions_prompt": global_screening_questions_prompt,
-                "job_description": global_job_description,
-                "job_title" : global_job_title,
-                "applicant_name" : global_applicant_name
+                "screening_questions_prompt": job_data['screening_questions_prompt'],
+                "job_description": job_data['description'],
+                "job_title" : job_data['title'],
+                "applicant_name" : application_data['name']
             }
         )
     # Create a Session
