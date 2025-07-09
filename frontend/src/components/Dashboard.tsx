@@ -83,17 +83,16 @@ export default function DashboardLayoutBranding() {
 
   const updatedNavigation = navigation.map((item) => {
     if (item.kind || !item.segment) return item;
-    if (item.segment === 'logout') {
-      return {
-        ...item,
-        onClick: handleLogout,
-        selected: false,
-      };
-    }
     return {
       ...item,
-      onClick: () => navigate(`/${item.segment}`),
-      selected: location.pathname.startsWith(`/${item.segment}`),
+      onClick: () => {
+        if (item.segment === 'logout') {
+          handleLogout();
+        } else {
+          navigate(`/${item.segment}`);
+        }
+      },
+      selected: item.segment !== 'logout' && location.pathname.startsWith(`/${item.segment}`),
     };
   });
 

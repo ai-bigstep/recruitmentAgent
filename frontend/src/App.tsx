@@ -1,6 +1,6 @@
 // App.tsx
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 
@@ -19,6 +19,18 @@ import ApplicationDetail from './components/ApplicationDetail';
 import EditJob from './pages/EditJob';
 import JobDetails from './pages/JobDetails';
 import ResetPassword from './pages/ResetPassword';
+
+// Logout component
+import { useEffect } from 'react';
+const Logout: React.FC = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    logout();
+    navigate('/login');
+  }, [logout, navigate]);
+  return null;
+};
 
 
 const App: React.FC = () => {
@@ -48,6 +60,7 @@ const App: React.FC = () => {
               loading ? <div>Loading...</div> :
               user && user.role === 'superadmin' ? <Register /> : <Navigate to="/" />
             } />
+            <Route path="/logout" element={<Logout />} />
           </Route>
 
           
