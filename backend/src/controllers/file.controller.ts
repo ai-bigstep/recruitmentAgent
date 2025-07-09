@@ -91,7 +91,7 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
 
     try {
       await sqs.send(messageCommand);
-      console.log(`Enqueued all resumes for job ID ${job_id} to SQS`);
+      
     } catch (err) {
       console.error('Error sending SQS message:', err);
     }

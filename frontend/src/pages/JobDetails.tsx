@@ -84,7 +84,11 @@ const JobDetails: React.FC = () => {
             <Typography fontWeight={600} gutterBottom>
               Description:
             </Typography>
-            {job.description || '\u2014'}
+            {job.description ? (
+              <div dangerouslySetInnerHTML={{ __html: job.description }} />
+            ) : (
+              '\u2014'
+            )}
           </Box>
 
           <Box>
