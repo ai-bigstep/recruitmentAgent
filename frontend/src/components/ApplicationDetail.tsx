@@ -267,6 +267,35 @@ const ApplicationDetail: React.FC = () => {
       field: 'call_status',
       headerName: 'Call Status',
       width: 130,
+      renderCell: (params: GridRenderCellParams) => {
+        const callStatus = params.row.call_status;
+        if (typeof callStatus === 'string') {
+          if (callStatus.toLowerCase() === 'in_progress') {
+            return (
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, mt: 2, color: 'text.secondary' }}
+              >
+                In Progress
+              </Typography>
+            );
+          } else if (callStatus.toLowerCase() === 'completed') {
+            return (
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, mt: 2, color: 'green' }}
+              >
+                Completed
+              </Typography>
+            );
+          }
+        }
+        return (
+          <Typography variant="body2" sx={{ fontWeight: 600, mt: 2 }}>
+            {callStatus}
+          </Typography>
+        );
+      },
     },
     {
       field: 'call_analysis',
