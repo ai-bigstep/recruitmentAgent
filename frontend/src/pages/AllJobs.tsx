@@ -81,8 +81,8 @@ const AllJobs: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" align="center" color="primary" gutterBottom>
-        All Jobs
+      <Typography variant="h4" align="left" color="primary" gutterBottom>
+        Jobs
       </Typography>
 
       <Snackbar
@@ -95,11 +95,11 @@ const AllJobs: React.FC = () => {
       />
 
       {jobs.length === 0 ? (
-        <Typography variant="body1" align="center" color="textSecondary">
+        <Typography variant="body1" align="left" color="textSecondary">
           No jobs found.
         </Typography>
       ) : (
-        <Grid container spacing={4} justifyContent="center">
+        <Grid container spacing={4} justifyContent="flex-start">
           {jobs.map((job: Job) => (
             <Grid item xs={12} md={4} key={job.id as string}>
               <JobCard

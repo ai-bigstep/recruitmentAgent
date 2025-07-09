@@ -13,16 +13,19 @@ import {
   Alert
 } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 interface UploadResumeModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   jobId: string;
 }
 
-const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, jobId }) => {
+const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, onSuccess, jobId }) => {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -74,30 +77,71 @@ const UploadResumeModal: React.FC<UploadResumeModalProps> = ({ open, onClose, jo
           },
           onUploadProgress: (e) => {
             if (e.total) {
-              const percent = Math.round((e.loaded / e.total) * 100);
-              setProgress(percent);
+              // Show 0-50% for file upload
+              const uploadPercent = Math.round((e.loaded * 50) / e.total);
+              setProgress(uploadPercent);
+              
+              // When upload reaches 50%, start processing phase
+              if (uploadPercent === 50) {
+                // Simulate processing from 50% to 100%
+                const processingInterval = setInterval(() => {
+                  setProgress(prev => {
+                    if (prev >= 100) {
+                      clearInterval(processingInterval);
+                      return 100;
+                    }
+                    return prev + 1; // Increment by 1% every 200ms
+                  });
+                }, 200);
+
+                // Complete processing after 10 seconds
+                setTimeout(() => {
+                  setProgress(100);
+                  clearInterval(processingInterval);
+                  
+                  setSnackbar({
+                    open: true,
+                    message: 'Resume upload successfully.',
+                    severity: 'success',
+                  });
+                  
+                  // Close modal and redirect to all jobs after showing success message
+                  setTimeout(() => {
+                    onClose();
+                    setFile(null);
+                    setProgress(0);
+                    navigate('/alljobs');
+                  }, 2000);
+                }, 10000); // 10 seconds for processing (50% to 100%)
+              }
             }
           },
         }
       );
 
       if (response.status === 200) {
-        setSnackbar({
-        open: true,
-        message: 'Resume upload successfully.',
-        severity: 'success',
-      });
-
-        setTimeout(() => {
-          onClose();
-          setFile(null);
-          setProgress(0);
-        }, 3000);
+        // If progress didn't reach 100% in onUploadProgress, set it here
+        if (progress < 100) {
+          setProgress(100);
+          setSnackbar({
+            open: true,
+            message: 'Resume upload successfully.',
+            severity: 'success',
+          });
+          if (onSuccess) onSuccess();
+          setTimeout(() => {
+            if (!onSuccess) onClose(); // Only call onClose if onSuccess is not present
+            setFile(null);
+            setProgress(0);
+            navigate('/alljobs');
+          }, 2000);
+        }
       } else {
         throw new Error('Server responded with failure.');
       }
     } catch (error) {
       console.error('Upload failed:', error);
+      setProgress(0);
       setSnackbar({
         open: true,
         message: 'Failed to upload resume. Please try again.',

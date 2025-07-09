@@ -96,7 +96,7 @@ const JobDetails: React.FC = () => {
 
           <Box>
             <Typography fontWeight={600} gutterBottom>
-              ATS Calculation Prompt:
+              Keywords for ATS Calculation:
             </Typography>
             {job.ats_calculation_prompt || '\u2014'}
           </Box>

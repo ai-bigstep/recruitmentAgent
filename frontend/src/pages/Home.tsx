@@ -1,50 +1,45 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, PlusCircle } from 'lucide-react';
-import CreateEditJobPage from './CreateJob';
-const Home = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+import { Box, Typography, Paper } from '@mui/material';
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-  
+const Home = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) return null; // just a guard (route should already be protected)
 
   return (
-    <div className="p-6 max-w-xl mx-auto text-center">
-      <h1 className="text-2xl font-bold mb-4">Welcome to your Dashboard</h1>
-      <p className="mb-2">👤 <strong>Email:</strong> {user.email}</p>
-      <p className="mb-4">🔐 <strong>Role:</strong> {user.role}</p>
-      <div className="flex justify-center gap-4 mt-6">
-  <button
-    onClick={handleLogout}
-    className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg shadow transition"
-  >
-    <LogOut className="w-5 h-5" />
-    Logout
-  </button>
-
-  
-</div>
-    </div>
+    <Box sx={{ maxWidth: 480, ml: 4, mt: 6, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3 }}>
+      <Typography variant="h4" fontWeight={700} gutterBottom>
+        Dashboard
+      </Typography>
+      <Paper elevation={2} sx={{ p: 2, mb: 2, width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ minWidth: 80 }}>
+            Name:
+          </Typography>
+          <Typography variant="body1">{user.name}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ minWidth: 80 }}>
+            Email:
+          </Typography>
+          <Typography variant="body1">{user.email}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ minWidth: 80 }}>
+            Role:
+          </Typography>
+          <Typography variant="body1">
+            {(user.role === 'superadmin' || user.role === 'recruiter')
+              ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+              : user.role}
+          </Typography>
+        </Box>
+      </Paper>
+    </Box>
   );
 };
 
 export default Home;
-
-
-
-
-
-// <button
-//     onClick={handleAddJob}
-//     className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow transition"
-//   >
-//     <PlusCircle className="w-5 h-5" />
-//     Add Job
-//   </button>

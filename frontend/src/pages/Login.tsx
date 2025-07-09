@@ -80,8 +80,12 @@ const Login = () => {
       <div className="max-w-md w-full">
         <div className="bg-zinc-900 p-10 rounded-3xl shadow-2xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
-            <p className="mt-2 text-sm text-gray-300">Sign in to your account</p>
+            <div className="flex justify-center mb-4">
+              <img src="/bigstep logo white.svg" alt="Bigstep Logo" className="h-16" />
+            </div>
+            {/* <h2 className="text-3xl font-bold text-white">Welcome Back</h2> */}
+            {/* <p className="mt-2 text-sm text-gray-300">Recruitment management system</p> */}
+            <p className="mt-2 text-xl font-semibold text-gray-300">Recruitment management system</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
