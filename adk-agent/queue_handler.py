@@ -10,9 +10,9 @@ load_dotenv()
 
 QUEUE_URL = 'https://sqs.ap-south-1.amazonaws.com/474560118046/resumequeue'
 # API_ENDPOINT = os.getenv('API_ENDPOINT')  # e.g., http://localhost:8000/api/process-resume
-RESUME_API_ENDPOINT = 'http://127.0.0.1:8000/resume_extract'  # Default for local testing
-JD_API_ENDPOINT = 'http://127.0.0.1:8000/jd_gen'
-CALLING_API_ENDPOINT = 'http://127.0.0.1:8000/call'
+RESUME_API_ENDPOINT = 'http://127.0.0.1:8003/resume_extract'  # Default for local testing
+JD_API_ENDPOINT = 'http://127.0.0.1:8003/jd_gen'
+CALLING_API_ENDPOINT = 'http://127.0.0.1:8003/call'
 AWS_REGION = os.getenv('AWS_REGION', 'ap-south-1')
 
 # Initialize AWS SQS client
