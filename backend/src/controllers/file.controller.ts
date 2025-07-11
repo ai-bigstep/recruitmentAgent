@@ -1,5 +1,4 @@
 import { Response } from 'express';
-import fs from 'fs';
 import AdmZip from 'adm-zip';
 import mime from 'mime-types';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
@@ -27,7 +26,7 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const zip = new AdmZip(file.path);
+    const zip = new AdmZip(file.buffer);
     const zipEntries = zip.getEntries();
 
     for (const entry of zipEntries) {
@@ -95,9 +94,6 @@ export const uploadResume = async (req: AuthRequest, res: Response) => {
     } catch (err) {
       console.error('Error sending SQS message:', err);
     }
-
-    // Step 6: Clean up ZIP file from disk
-    fs.unlinkSync(file.path);
 
     return res.status(200).json({
       message: 'Resumes uploaded successfully',

@@ -426,6 +426,8 @@ const ApplicationDetail: React.FC = () => {
                     setRows((prev) => prev.map((row) =>
                       selectedIdArray.includes(row.id) ? { ...row, is_accepted: true } : row
                     ));
+                    // Clear selection after successful operation
+                    setRowSelectionModel({ type: 'include', ids: new Set() });
                   } catch (err) {
                     alert('Failed to shortlist one or more applicants.');
                     console.error(err);
@@ -457,6 +459,8 @@ const ApplicationDetail: React.FC = () => {
                     setRows((prev) => prev.map((row) =>
                       selectedIdArray.includes(row.id) ? { ...row, is_accepted: false } : row
                     ));
+                    // Clear selection after successful operation
+                    setRowSelectionModel({ type: 'include', ids: new Set() });
                   } catch (err) {
                     alert('Failed to reject one or more applicants.');
                     console.error(err);

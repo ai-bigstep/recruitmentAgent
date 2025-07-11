@@ -22,7 +22,7 @@ import multer from 'multer';
 import { uploadResume } from '../controllers/file.controller';
 import catchAsync from '../utils/catchAsync';
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();
 
 // Job routes
