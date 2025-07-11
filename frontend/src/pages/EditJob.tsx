@@ -41,6 +41,11 @@ const fetchJob = async (id: string | undefined): Promise<Job> => {
   return res.data;
 };
 
+// Helper to check if job description is empty (ignoring HTML tags and whitespace)
+function isDescriptionEmpty(html: string) {
+  return html.replace(/<[^>]+>/g, '').trim().length === 0;
+}
+
 const EditJob: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [jobTitle, setJobTitle] = useState('');
@@ -97,7 +102,38 @@ const EditJob: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
+    
+
+    // Validate required fields
+    if (!jobTitle.trim()) {
+      setMessage({ type: 'error', text: 'Job title is required.' });
+      return;
+    }
+    
+    if (isDescriptionEmpty(jobDescription)) {
+      setMessage({ type: 'error', text: 'Job description is required.' });
+      return;
+    }
+    
+    if (locationChips.length === 0) {
+      setMessage({ type: 'error', text: 'At least one location is required.' });
+      return;
+    }
+    
+    if (keywords.length === 0) {
+      setMessage({ type: 'error', text: 'At least one keyword is required.' });
+      return;
+    }
+    
+    if (!screeningPrompt.trim()) {
+      setMessage({ type: 'error', text: 'Screening questions is required.' });
+      return;
+    }
     setLoading(true);
+
+
+
+
     const token = localStorage.getItem('token');
     try {
       await axios.put(
@@ -117,7 +153,7 @@ const EditJob: React.FC = () => {
       setMessage({ type: 'success', text: 'Job updated successfully!' });
       setTimeout(() => navigate('/alljobs'), 1000);
     } catch (error: any) {
-      const errMsg = error.response?.data?.message || error.message || 'Failed to update job';
+      const errMsg =  'Failed to update job';
       setMessage({ type: 'error', text: errMsg });
     } finally {
       setLoading(false);
@@ -265,7 +301,7 @@ const EditJob: React.FC = () => {
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
             fullWidth
-            required
+            
           />
 
           <Stack spacing={1}>
@@ -324,7 +360,7 @@ const EditJob: React.FC = () => {
             rows={4}
             fullWidth
             inputProps={{ style: { overflow: 'auto' } }}
-            required
+            
           />
 
           <Stack spacing={1}>
@@ -378,7 +414,7 @@ const EditJob: React.FC = () => {
             value={type}
             onChange={(e) => setType(e.target.value)}
             fullWidth
-            required
+            
           >
             <MenuItem value="Full Time">Full Time</MenuItem>
             <MenuItem value="Freelance">Freelance</MenuItem>

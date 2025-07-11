@@ -40,6 +40,11 @@ const quillModules = {
   ]
 };
 
+// Helper to check if job description is empty (ignoring HTML tags and whitespace)
+function isDescriptionEmpty(html: string) {
+  return html.replace(/<[^>]+>/g, '').trim().length === 0;
+}
+
 const CreateJob: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -96,6 +101,33 @@ const CreateJob: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!jobTitle.trim()) {
+      setMessage({ type: 'error', text: 'Job title is required.' });
+      return;
+    }
+    
+    if (isDescriptionEmpty(jobDescription)) {
+      setMessage({ type: 'error', text: 'Job description is required.' });
+      return;
+    }
+    
+    if (locationChips.length === 0) {
+      setMessage({ type: 'error', text: 'At least one location is required.' });
+      return;
+    }
+    
+    if (keywords.length === 0) {
+      setMessage({ type: 'error', text: 'At least one keyword is required.' });
+      return;
+    }
+    
+    if (!screeningPrompt.trim()) {
+      setMessage({ type: 'error', text: 'Screening questions  is required.' });
+      return;
+    }
+    
     setLoading(true);
     setMessage(null);
 
@@ -134,7 +166,7 @@ const CreateJob: React.FC = () => {
         navigate('/alljobs');
       }, 1000);
     } catch (error: any) {
-      const errMsg = error.response?.data?.message || error.message || 'Failed to submit job';
+      const errMsg = 'Failed to submit job';
       setMessage({ type: 'error', text: errMsg });
     } finally {
       setLoading(false);
@@ -234,7 +266,7 @@ const CreateJob: React.FC = () => {
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
             fullWidth
-            required
+            
           />
 
           <Stack spacing={1}>
