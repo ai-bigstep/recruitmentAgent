@@ -61,12 +61,29 @@ const ApplicationDetail: React.FC = () => {
       page: (page + 1).toString(),
       pageSize: pageSize.toString(),
     });
-    fetch(`${baseURL}/api/applicant/job/${job_id}?${params}`)
+    const token = localStorage.getItem('token');
+    fetch(`${baseURL}/api/applicant/job/${job_id}?${params}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
       .then(res => res.json())
       .then(data => {
         console.log(data);
-        setRows(data.rows || data);
+        const applicants = data.rows || data;
+        setRows(applicants);
         setTotalCount(data.count || data.length || 0);
+        
+        // Initialize ratedCandidates based on existing ratings
+        const ratedIds = new Set<string>();
+        applicants.forEach((applicant: Candidate) => {
+          console.log(`Applicant ${applicant.id}: rating = ${applicant.rating}, type = ${typeof applicant.rating}`);
+          if (applicant.rating !== undefined && applicant.rating !== null && applicant.rating > 0) {
+            ratedIds.add(applicant.id);
+          }
+        });
+        console.log('Rated candidates:', Array.from(ratedIds));
+        setRatedCandidates(ratedIds);
       })
       .catch(err => {
         console.error('Failed to fetch applicants:', err);
@@ -78,9 +95,13 @@ const ApplicationDetail: React.FC = () => {
     setDisabledCalls((prev) => new Set(prev).add(id));
     console.log(`Calling candidate ID ${id}...`);
     if (!jobId) return;
+    const token = localStorage.getItem('token');
     try {
       const res = await fetch(`${baseURL}/api/applicant/call/${jobId}/${id}`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       if (!res.ok) throw new Error('Failed to enqueue call request');
       // Optionally show a success message or update UI
@@ -95,13 +116,19 @@ const ApplicationDetail: React.FC = () => {
 
   const handleRatingChange = async (id: string, newRating: number | null) => {
     if (newRating !== null) {
+      console.log(`Updating rating for applicant ${id} to ${newRating}`);
+      const token = localStorage.getItem('token');
       try {
         const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
           body: JSON.stringify({ rating: newRating }),
         });
         if (!res.ok) throw new Error('Failed to update applicant');
+        console.log('Rating update successful');
         setRows((prev) =>
           prev.map((row) =>
             row.id === id ? { ...row, rating: newRating } : row
@@ -122,10 +149,14 @@ const ApplicationDetail: React.FC = () => {
 
   const handleDeleteSelected = async () => {
     // Soft delete each selected applicant via backend
+    const token = localStorage.getItem('token');
     try {
       await Promise.all(selectedIdArray.map(async (id) => {
         const res = await fetch(`${baseURL}/api/applicant/delete/${id}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
         if (!res.ok) {
           throw new Error(`Failed to delete applicant with id ${id}`);
@@ -379,11 +410,15 @@ const ApplicationDetail: React.FC = () => {
                 size="small"
                 onClick={async () => {
                   // Bulk shortlist
+                  const token = localStorage.getItem('token');
                   try {
                     await Promise.all(selectedIdArray.map(async (id) => {
                       const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}`,
+                        },
                         body: JSON.stringify({ is_accepted: true }),
                       });
                       if (!res.ok) throw new Error(`Failed to shortlist applicant with id ${id}`);
@@ -406,11 +441,15 @@ const ApplicationDetail: React.FC = () => {
                 size="small"
                 onClick={async () => {
                   // Bulk reject
+                  const token = localStorage.getItem('token');
                   try {
                     await Promise.all(selectedIdArray.map(async (id) => {
                       const res = await fetch(`${baseURL}/api/applicant/update/${id}`, {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}`,
+                        },
                         body: JSON.stringify({ is_accepted: false }),
                       });
                       if (!res.ok) throw new Error(`Failed to reject applicant with id ${id}`);
